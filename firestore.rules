@@ -1,0 +1,56 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Funciones auxiliares ----------
+
+    function estaLogueado() {
+      return request.auth != null;
+    }
+
+    // El documento que YA existe pertenece al usuario logueado
+    function esDueno(datos) {
+      return estaLogueado() && datos.userId == request.auth.uid;
+    }
+
+    // Validación de lo que se está escribiendo en una prenda
+    function prendaValida(datos) {
+      return datos.userId == request.auth.uid
+        && datos.nombre is string
+        && datos.nombre.size() > 0
+        && datos.nombre.size() <= 100
+        && datos.categoria in ['superior', 'inferior', 'calzado', 'abrigo', 'accesorio']
+        && datos.colores is list
+        && datos.ocasiones is list
+        && datos.fotoUrl is string;
+    }
+
+    // Validación de lo que se está escribiendo en un outfit
+    function outfitValido(datos) {
+      return datos.userId == request.auth.uid
+        && datos.prendasIds is list
+        && datos.favorito is bool;
+    }
+
+    // ---------- Colección prendas ----------
+
+    match /prendas/{prendaId} {
+      allow read: if esDueno(resource.data);
+      allow create: if estaLogueado() && prendaValida(request.resource.data);
+      allow update: if esDueno(resource.data) && prendaValida(request.resource.data);
+      allow delete: if esDueno(resource.data);
+    }
+
+    // ---------- Colección outfits (se usa en la semana 2) ----------
+
+    match /outfits/{outfitId} {
+      allow read: if esDueno(resource.data);
+      allow create: if estaLogueado() && outfitValido(request.resource.data);
+      allow update: if esDueno(resource.data) && outfitValido(request.resource.data);
+      allow delete: if esDueno(resource.data);
+    }
+
+    // Todo lo que no está listado arriba queda DENEGADO por defecto.
+  }
+}
