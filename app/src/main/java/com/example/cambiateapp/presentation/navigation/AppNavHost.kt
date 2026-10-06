@@ -7,6 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.cambiateapp.presentation.auth.LoginRoute
 
 @Composable
 fun AppNavHost(
@@ -22,18 +23,13 @@ fun AppNavHost(
     ) {
 
         composable(Ruta.Login.route) {
-            PantallaPlaceholder(
-                titulo = "Login (pantalla pendiente)",
-                botones = listOf(
-                    BotonPlaceholder("Entrar (simulado)") {
-                        navController.navigate(Ruta.Lista.route) {
-                            popUpTo(Ruta.Login.route) { inclusive = true }
-                        }
-                    },
-                    BotonPlaceholder("Ir a registro") {
-                        navController.navigate(Ruta.Register.route)
+            LoginRoute(
+                onLoginExitoso = {
+                    navController.navigate(Ruta.Lista.route) {
+                        popUpTo(Ruta.Login.route) { inclusive = true }
                     }
-                )
+                },
+                onIrARegistro = { navController.navigate(Ruta.Register.route) }
             )
         }
 
