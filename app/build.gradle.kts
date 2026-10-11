@@ -64,4 +64,6 @@ dependencies {
     implementation(libs.navigation.compose)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.lifecycle.runtime.compose)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 }
