@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.cambiateapp.presentation.auth.LoginRoute
 import com.example.cambiateapp.presentation.auth.RegisterRoute
+import com.example.cambiateapp.presentation.wardrobe.WardrobeListRoute
 
 @Composable
 fun AppNavHost(
@@ -46,17 +47,10 @@ fun AppNavHost(
         }
 
         composable(Ruta.Lista.route) {
-            PantallaPlaceholder(
-                titulo = "Lista de prendas (pantalla pendiente)",
-                botones = listOf(
-                    BotonPlaceholder("Ver detalle de la prenda 1") {
-                        navController.navigate(Ruta.Detalle.crear("1"))
-                    },
-                    BotonPlaceholder("Nueva prenda") {
-                        navController.navigate(Ruta.AltaEdicion.crear())
-                    },
-                    BotonPlaceholder("Cerrar sesión", onCerrarSesion)
-                )
+            WardrobeListRoute(
+                onPrendaClick = { id -> navController.navigate(Ruta.Detalle.crear(id)) },
+                onNuevaClick = { navController.navigate(Ruta.AltaEdicion.crear()) },
+                onCerrarSesion = onCerrarSesion
             )
         }
 
