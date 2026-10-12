@@ -1,37 +1,59 @@
 package com.example.cambiateapp.presentation.wardrobe
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.AddAPhoto
 import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.PhotoCamera
+import androidx.compose.material.icons.rounded.PhotoLibrary
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
 import com.example.cambiateapp.domain.model.Categoria
 import com.example.cambiateapp.domain.model.Ocasion
 import com.example.cambiateapp.presentation.components.AppTextField
@@ -42,7 +64,7 @@ import com.example.cambiateapp.presentation.components.LoadingState
 import com.example.cambiateapp.presentation.components.PrimaryButton
 import com.example.cambiateapp.ui.theme.CambiateAppTheme
 
-/** Capa con estado: conecta el ViewModel con la pantalla. No navega: avisa con callbacks. */
+/** Capa con estado: conecta el ViewModel, arma los selectores de foto y avisa con callbacks. */
 @Composable
 fun AltaEdicionRoute(
     onGuardado: () -> Unit,
@@ -50,6 +72,23 @@ fun AltaEdicionRoute(
     viewModel: AltaEdicionViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    // Uri donde la cámara va a dejar la foto. Se guarda para sobrevivir a una rotación.
+    var uriCamara by rememberSaveable { mutableStateOf<Uri?>(null) }
+
+    val galeria = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) viewModel.onEvent(AltaEdicionUiEvent.FotoSeleccionada(uri.toString()))
+    }
+
+    val camara = rememberLauncherForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { tomada ->
+        val uri = uriCamara
+        if (tomada && uri != null) viewModel.onEvent(AltaEdicionUiEvent.FotoSeleccionada(uri.toString()))
+    }
 
     // Cuando se guardó bien, avisamos una sola vez para que la navegación vuelva atrás.
     LaunchedEffect(state.guardadoExitoso) {
@@ -59,6 +98,14 @@ fun AltaEdicionRoute(
     AltaEdicionScreen(
         state = state,
         onEvent = viewModel::onEvent,
+        onGaleria = {
+            galeria.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        },
+        onCamara = {
+            val uri = crearUriParaCamara(context)
+            uriCamara = uri
+            camara.launch(uri)
+        },
         onVolver = onVolver
     )
 }
@@ -69,6 +116,8 @@ fun AltaEdicionRoute(
 fun AltaEdicionScreen(
     state: AltaEdicionUiState,
     onEvent: (AltaEdicionUiEvent) -> Unit,
+    onGaleria: () -> Unit,
+    onCamara: () -> Unit,
     onVolver: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -107,7 +156,12 @@ fun AltaEdicionScreen(
                     mensaje = state.errorCarga,
                     onReintentar = { onEvent(AltaEdicionUiEvent.ReintentarCarga) }
                 )
-                else -> Formulario(state = state, onEvent = onEvent)
+                else -> Formulario(
+                    state = state,
+                    onEvent = onEvent,
+                    onGaleria = onGaleria,
+                    onCamara = onCamara
+                )
             }
         }
     }
@@ -117,7 +171,9 @@ fun AltaEdicionScreen(
 @Composable
 private fun Formulario(
     state: AltaEdicionUiState,
-    onEvent: (AltaEdicionUiEvent) -> Unit
+    onEvent: (AltaEdicionUiEvent) -> Unit,
+    onGaleria: () -> Unit,
+    onCamara: () -> Unit
 ) {
     val habilitado = !state.guardando
 
@@ -128,6 +184,14 @@ private fun Formulario(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        SeccionFoto(
+            foto = state.fotoMostrada,
+            error = state.errorFoto,
+            habilitado = habilitado,
+            onGaleria = onGaleria,
+            onCamara = onCamara
+        )
+
         AppTextField(
             value = state.nombre,
             onValueChange = { onEvent(AltaEdicionUiEvent.NombreCambio(it)) },
@@ -179,17 +243,6 @@ private fun Formulario(
             label = "Colores",
             leadingIcon = Icons.Rounded.Palette,
             ayuda = "Separados por coma. Ej: blanco, azul",
-            enabled = habilitado
-        )
-
-        AppTextField(
-            value = state.fotoUrl,
-            onValueChange = { onEvent(AltaEdicionUiEvent.FotoUrlCambio(it)) },
-            label = "URL de la foto",
-            leadingIcon = Icons.Rounded.Link,
-            ayuda = "Provisorio: más adelante se elige de la galería o la cámara",
-            error = state.errorFoto,
-            keyboardType = KeyboardType.Uri,
             imeAction = ImeAction.Done,
             enabled = habilitado
         )
@@ -210,12 +263,87 @@ private fun Formulario(
     }
 }
 
+@Composable
+private fun SeccionFoto(
+    foto: String,
+    error: String?,
+    habilitado: Boolean,
+    onGaleria: () -> Unit,
+    onCamara: () -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(text = "Foto", style = MaterialTheme.typography.titleMedium)
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(240.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center
+        ) {
+            if (foto.isBlank()) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        imageVector = Icons.Rounded.AddAPhoto,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "Todavía no elegiste una foto",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            } else {
+                AsyncImage(
+                    model = foto,
+                    contentDescription = "Foto de la prenda",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(
+                onClick = onGaleria,
+                enabled = habilitado,
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(Icons.Rounded.PhotoLibrary, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Galería")
+            }
+            OutlinedButton(
+                onClick = onCamara,
+                enabled = habilitado,
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(Icons.Rounded.PhotoCamera, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Cámara")
+            }
+        }
+
+        if (error != null) {
+            Text(
+                text = error,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+    }
+}
+
 // ---- Vistas previas ----
 
 @Preview(showBackground = true)
 @Composable
 private fun PreviewNueva() {
-    CambiateAppTheme { AltaEdicionScreen(AltaEdicionUiState(), {}, {}) }
+    CambiateAppTheme { AltaEdicionScreen(AltaEdicionUiState(), {}, {}, {}, {}) }
 }
 
 @Preview(showBackground = true)
@@ -230,9 +358,9 @@ private fun PreviewEdicionConError() {
                 ocasiones = setOf(Ocasion.CASUAL, Ocasion.SALIDA),
                 colores = "negro, blanco",
                 errorNombre = "Ingresá un nombre",
-                errorFoto = "Agregá la foto de la prenda"
+                errorFoto = "Elegí una foto para la prenda"
             ),
-            {}, {}
+            {}, {}, {}, {}
         )
     }
 }
