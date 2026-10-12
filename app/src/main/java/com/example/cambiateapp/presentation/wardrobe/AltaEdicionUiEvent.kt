@@ -9,7 +9,7 @@ sealed interface AltaEdicionUiEvent {
     data class CategoriaSeleccionada(val categoria: Categoria) : AltaEdicionUiEvent
     data class ColoresCambio(val valor: String) : AltaEdicionUiEvent
     data class OcasionAlternada(val ocasion: Ocasion) : AltaEdicionUiEvent
-    data class FotoUrlCambio(val valor: String) : AltaEdicionUiEvent
+    data class FotoSeleccionada(val uri: String) : AltaEdicionUiEvent
     data object Guardar : AltaEdicionUiEvent
     data object ReintentarCarga : AltaEdicionUiEvent
 }

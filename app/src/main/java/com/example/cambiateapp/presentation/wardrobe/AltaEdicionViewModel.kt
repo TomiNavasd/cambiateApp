@@ -9,6 +9,7 @@ import com.example.cambiateapp.domain.model.Ocasion
 import com.example.cambiateapp.domain.model.Prenda
 import com.example.cambiateapp.domain.usecase.GetPrendaUseCase
 import com.example.cambiateapp.domain.usecase.SavePrendaUseCase
+import com.example.cambiateapp.domain.usecase.UploadImageUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -22,7 +23,8 @@ import kotlinx.coroutines.launch
 class AltaEdicionViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getPrenda: GetPrendaUseCase,
-    private val savePrenda: SavePrendaUseCase
+    private val savePrenda: SavePrendaUseCase,
+    private val uploadImage: UploadImageUseCase
 ) : ViewModel() {
 
     // null = prenda nueva; con valor = editamos esa prenda.
@@ -52,8 +54,8 @@ class AltaEdicionViewModel @Inject constructor(
                 else it.ocasiones + event.ocasion
                 it.copy(ocasiones = nuevas)
             }
-            is AltaEdicionUiEvent.FotoUrlCambio ->
-                _uiState.update { it.copy(fotoUrl = event.valor, errorFoto = null) }
+            is AltaEdicionUiEvent.FotoSeleccionada ->
+                _uiState.update { it.copy(fotoLocalUri = event.uri, errorFoto = null) }
             AltaEdicionUiEvent.Guardar -> guardar()
             AltaEdicionUiEvent.ReintentarCarga -> prendaId?.let { cargarPrenda(it) }
         }
@@ -90,27 +92,47 @@ class AltaEdicionViewModel @Inject constructor(
     private fun guardar() {
         val actual = _uiState.value
         if (actual.guardando) return
+
+        // Evita subir la foto si el nombre está vacío: no tiene sentido gastar la subida.
+        if (actual.nombre.isBlank()) {
+            _uiState.update { it.copy(errorNombre = "Ingresá un nombre") }
+            return
+        }
+
         _uiState.update {
             it.copy(guardando = true, errorNombre = null, errorFoto = null, errorGeneral = null)
         }
 
-        val prenda = Prenda(
-            id = prendaId.orEmpty(),
-            nombre = actual.nombre,
-            descripcion = actual.descripcion.trim(),
-            categoria = actual.categoria,
-            colores = parsearColores(actual.colores),
-            ocasiones = Ocasion.entries.filter { it in actual.ocasiones },
-            fotoUrl = actual.fotoUrl.trim()
-        )
-
         viewModelScope.launch {
+            var fotoUrl = actual.fotoUrl
+
+            // 1) Si eligió una foto nueva, la subimos y nos quedamos con la URL.
+            val fotoLocal = actual.fotoLocalUri
+            if (fotoLocal != null) {
+                fotoUrl = uploadImage(fotoLocal).getOrElse { error ->
+                    _uiState.update { aplicarError(it, error, alSubirFoto = true) }
+                    return@launch
+                }
+                // Guardamos la URL ya subida: si el guardado falla, al reintentar no se vuelve a subir.
+                _uiState.update { it.copy(fotoUrl = fotoUrl, fotoLocalUri = null) }
+            }
+
+            // 2) Guardamos la prenda con esa URL.
+            val prenda = Prenda(
+                id = prendaId.orEmpty(),
+                nombre = actual.nombre,
+                descripcion = actual.descripcion.trim(),
+                categoria = actual.categoria,
+                colores = parsearColores(actual.colores),
+                ocasiones = Ocasion.entries.filter { it in actual.ocasiones },
+                fotoUrl = fotoUrl
+            )
             savePrenda(prenda).fold(
                 onSuccess = {
                     _uiState.update { it.copy(guardando = false, guardadoExitoso = true) }
                 },
                 onFailure = { error ->
-                    _uiState.update { aplicarError(it, error) }
+                    _uiState.update { aplicarError(it, error, alSubirFoto = false) }
                 }
             )
         }
@@ -122,14 +144,20 @@ class AltaEdicionViewModel @Inject constructor(
             .filter { it.isNotEmpty() }
             .distinct()
 
-    private fun aplicarError(estado: AltaEdicionUiState, error: Throwable): AltaEdicionUiState {
+    private fun aplicarError(
+        estado: AltaEdicionUiState,
+        error: Throwable,
+        alSubirFoto: Boolean
+    ): AltaEdicionUiState {
         val base = estado.copy(guardando = false)
         return when {
             error is DomainException.Validacion -> when (error.campo) {
                 CampoInvalido.NOMBRE -> base.copy(errorNombre = "Ingresá un nombre")
-                CampoInvalido.FOTO -> base.copy(errorFoto = "Agregá la foto de la prenda")
+                CampoInvalido.FOTO -> base.copy(errorFoto = "Elegí una foto para la prenda")
                 else -> base.copy(errorGeneral = "Revisá los datos ingresados")
             }
+            alSubirFoto && error !== DomainException.SinConexion ->
+                base.copy(errorGeneral = "No pudimos subir la foto. Intentá de nuevo")
             else -> base.copy(errorGeneral = mensajeDe(error, guardando = true))
         }
     }

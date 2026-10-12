@@ -8,7 +8,7 @@ data class AltaEdicionUiState(
     val cargando: Boolean = false,          // trayendo la prenda a editar
     val noEncontrada: Boolean = false,
     val errorCarga: String? = null,
-    val guardando: Boolean = false,
+    val guardando: Boolean = false,         // subiendo la foto y/o guardando
     val guardadoExitoso: Boolean = false,
 
     val nombre: String = "",
@@ -16,9 +16,13 @@ data class AltaEdicionUiState(
     val categoria: Categoria = Categoria.SUPERIOR,
     val colores: String = "",               // texto crudo, separado por comas
     val ocasiones: Set<Ocasion> = emptySet(),
-    val fotoUrl: String = "",
+    val fotoUrl: String = "",               // URL ya subida (la que se guarda en la prenda)
+    val fotoLocalUri: String? = null,       // foto recién elegida, todavía sin subir
 
     val errorNombre: String? = null,
     val errorFoto: String? = null,
     val errorGeneral: String? = null
-)
+) {
+    /** Lo que se muestra en pantalla: la foto nueva si hay, si no la que ya tenía la prenda. */
+    val fotoMostrada: String get() = fotoLocalUri ?: fotoUrl
+}
