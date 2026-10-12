@@ -25,6 +25,7 @@ class SavePrendaUseCaseTest {
             guardada = prenda
             return Result.success(Unit)
         }
+        override suspend fun eliminarPrenda(id: String): Result<Unit> = Result.success(Unit)
     }
 
     private fun prendaValida() = Prenda(

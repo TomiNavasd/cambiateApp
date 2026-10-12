@@ -8,4 +8,6 @@ data class Outfit(
     val prendasIds: List<String>,
     val fecha: Instant,
     val favorito: Boolean
-)
+) {
+    val esNuevo: Boolean get() = id.isEmpty()
+}

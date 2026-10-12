@@ -12,4 +12,5 @@ interface PrendaRepository {
 
     /** Si prenda.esNueva la crea; si no, la actualiza. Falla con una DomainException. */
     suspend fun guardarPrenda(prenda: Prenda): Result<Unit>
+    suspend fun eliminarPrenda(id: String): Result<Unit>
 }

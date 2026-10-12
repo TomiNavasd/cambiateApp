@@ -35,6 +35,12 @@ class FakePrendaRepository @Inject constructor() : PrendaRepository {
         }
         return Result.success(Unit)
     }
+
+    override suspend fun eliminarPrenda(id: String): Result<Unit> {
+        delay(300) // simula la demora de la red
+        prendas.update { lista -> lista.filterNot { it.id == id } }
+        return Result.success(Unit)
+    }
 }
 
 private fun prenda(
@@ -56,15 +62,15 @@ private fun prenda(
 
 private fun prendasIniciales(): List<Prenda> = listOf(
     prenda("1", "Remera blanca básica", "Algodón, cuello redondo", Categoria.SUPERIOR, listOf("blanco"), listOf(Ocasion.CASUAL, Ocasion.DEPORTE)),
-    prenda("2", "Camisa celeste", "Manga larga, corte clásico", Categoria.SUPERIOR, listOf("celeste"), listOf(Ocasion.TRABAJO, Ocasion.FORMAL)),
-    prenda("3", "Remera negra", "Algodón, cuello redondo", Categoria.SUPERIOR, listOf("negro"), listOf(Ocasion.FIESTA, Ocasion.CASUAL)),
-    prenda("4", "Jean azul", "Corte recto", Categoria.INFERIOR, listOf("azul"), listOf(Ocasion.CASUAL)),
-    prenda("5", "Jean negro", "Corte recto", Categoria.INFERIOR, listOf("negro"), listOf(Ocasion.CASUAL, Ocasion.FIESTA)),
+    prenda("2", "Camisa celeste", "Manga larga, corte clásico", Categoria.SUPERIOR, listOf("celeste"), listOf(Ocasion.TRABAJO, Ocasion.FACULTAD)),
+    prenda("3", "Remera negra", "Algodón, cuello redondo", Categoria.SUPERIOR, listOf("negro"), listOf(Ocasion.SALIDA, Ocasion.CASUAL)),
+    prenda("4", "Jean azul", "Corte recto", Categoria.INFERIOR, listOf("azul"), listOf(Ocasion.CASUAL, Ocasion.FACULTAD)),
+    prenda("5", "Jean negro", "Corte recto", Categoria.INFERIOR, listOf("negro"), listOf(Ocasion.CASUAL, Ocasion.SALIDA)),
     prenda("6", "Zapatillas blancas", "Para todos los días", Categoria.CALZADO, listOf("blanco"), listOf(Ocasion.CASUAL, Ocasion.DEPORTE)),
-    prenda("7", "Zapatos de cuero marrón", "Con cordones", Categoria.CALZADO, listOf("marrón"), listOf(Ocasion.TRABAJO, Ocasion.FORMAL)),
-    prenda("8", "Campera de jean", "Con botones metálicos", Categoria.ABRIGO, listOf("azul"), listOf(Ocasion.CASUAL)),
-    prenda("9", "Blazer negro", "Corte clásico", Categoria.ABRIGO, listOf("negro"), listOf(Ocasion.FORMAL, Ocasion.TRABAJO)),
-    prenda("10", "Reloj plateado", "Malla metálica", Categoria.ACCESORIO, listOf("plateado"), listOf(Ocasion.FORMAL, Ocasion.FIESTA))
+    prenda("7", "Zapatos de cuero marrón", "Con cordones", Categoria.CALZADO, listOf("marrón"), listOf(Ocasion.TRABAJO, Ocasion.CASAMIENTO)),
+    prenda("8", "Campera de jean", "Con botones metálicos", Categoria.ABRIGO, listOf("azul"), listOf(Ocasion.CASUAL, Ocasion.SALIDA)),
+    prenda("9", "Blazer negro", "Corte clásico", Categoria.ABRIGO, listOf("negro"), listOf(Ocasion.CASAMIENTO, Ocasion.TRABAJO)),
+    prenda("10", "Reloj plateado", "Malla metálica", Categoria.ACCESORIO, listOf("plateado"), listOf(Ocasion.CASAMIENTO, Ocasion.SALIDA))
 )
 
 

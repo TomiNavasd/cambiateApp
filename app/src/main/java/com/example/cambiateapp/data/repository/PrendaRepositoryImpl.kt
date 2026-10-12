@@ -81,6 +81,16 @@ class PrendaRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
+    override suspend fun eliminarPrenda(id: String): Result<Unit> {
+        if (auth.currentUser == null) return Result.failure(DomainException.SesionNoIniciada)
+        return try {
+            llamarRemoto { prendas.document(id).delete().await() }
+            Result.success(Unit)
+        } catch (e: DomainException) {
+            Result.failure(e)
+        }
+    }
+
 
     /** Ejecuta una llamada a Firestore con límite de tiempo y errores traducidos al dominio. */
     private suspend fun <T> llamarRemoto(bloque: suspend () -> T): T =

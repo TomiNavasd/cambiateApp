@@ -16,4 +16,5 @@ sealed class Ruta(val route: String) {
         const val ARG_ID = "id"
         fun crear(id: String? = null) = if (id == null) "alta_edicion" else "alta_edicion?id=$id"
     }
+    data object Outfits : Ruta("outfits")
 }
