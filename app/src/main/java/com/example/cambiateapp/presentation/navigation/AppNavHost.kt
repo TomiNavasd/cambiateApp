@@ -9,6 +9,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.cambiateapp.presentation.auth.LoginRoute
 import com.example.cambiateapp.presentation.auth.RegisterRoute
+import com.example.cambiateapp.presentation.wardrobe.AltaEdicionRoute
+import com.example.cambiateapp.presentation.wardrobe.PrendaDetailRoute
 import com.example.cambiateapp.presentation.wardrobe.WardrobeListRoute
 
 @Composable
@@ -59,16 +61,11 @@ fun AppNavHost(
             arguments = listOf(
                 navArgument(Ruta.Detalle.ARG_ID) { type = NavType.StringType }
             )
-        ) { entrada ->
-            val id = entrada.arguments?.getString(Ruta.Detalle.ARG_ID).orEmpty()
-            PantallaPlaceholder(
-                titulo = "Detalle de la prenda: $id",
-                botones = listOf(
-                    BotonPlaceholder("Editar") {
-                        navController.navigate(Ruta.AltaEdicion.crear(id))
-                    },
-                    BotonPlaceholder("Volver") { navController.popBackStack() }
-                )
+        ) {
+            PrendaDetailRoute(
+                onEditar = { id -> navController.navigate(Ruta.AltaEdicion.crear(id)) },
+                onEliminada = { navController.popBackStack() },
+                onVolver = { navController.popBackStack() }
             )
         }
 
@@ -81,14 +78,10 @@ fun AppNavHost(
                     defaultValue = null
                 }
             )
-        ) { entrada ->
-            val id = entrada.arguments?.getString(Ruta.AltaEdicion.ARG_ID)
-            PantallaPlaceholder(
-                titulo = if (id == null) "Nueva prenda" else "Editando la prenda: $id",
-                botones = listOf(
-                    BotonPlaceholder("Guardar (simulado)") { navController.popBackStack() },
-                    BotonPlaceholder("Volver") { navController.popBackStack() }
-                )
+        ) {
+            AltaEdicionRoute(
+                onGuardado = { navController.popBackStack() },
+                onVolver = { navController.popBackStack() }
             )
         }
 
