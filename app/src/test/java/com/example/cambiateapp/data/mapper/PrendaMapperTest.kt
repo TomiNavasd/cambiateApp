@@ -24,11 +24,11 @@ class PrendaMapperTest {
 
     @Test
     fun `dto valido se convierte a dominio`() {
-        val prenda = dto(ocasiones = listOf("casual", "formal")).toDomain()
+        val prenda = dto(ocasiones = listOf("casual", "trabajo")).toDomain()
         assertNotNull(prenda)
         assertEquals("p1", prenda!!.id)
         assertEquals(Categoria.SUPERIOR, prenda.categoria)
-        assertEquals(listOf(Ocasion.CASUAL, Ocasion.FORMAL), prenda.ocasiones)
+        assertEquals(listOf(Ocasion.CASUAL, Ocasion.TRABAJO), prenda.ocasiones)
     }
 
     @Test

@@ -91,5 +91,14 @@ fun AppNavHost(
                 )
             )
         }
+
+        composable(Ruta.Outfits.route) {
+            PantallaPlaceholder(
+                titulo = "Outfits",
+                botones = listOf(
+                    BotonPlaceholder("Volver") { navController.popBackStack() }
+                )
+            )
+        }
     }
 }
