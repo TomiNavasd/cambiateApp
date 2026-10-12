@@ -7,5 +7,6 @@ import javax.inject.Inject
 class GetPrendaUseCase @Inject constructor(
     private val repository: PrendaRepository
 ) {
+    /** Devuelve null si la prenda no existe o no es del usuario logueado. */
     suspend operator fun invoke(id: String): Prenda? = repository.obtenerPrenda(id)
 }

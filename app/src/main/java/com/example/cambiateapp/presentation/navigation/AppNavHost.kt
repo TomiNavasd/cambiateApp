@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.cambiateapp.presentation.auth.LoginRoute
 import com.example.cambiateapp.presentation.auth.RegisterRoute
+import com.example.cambiateapp.presentation.wardrobe.AltaEdicionRoute
 import com.example.cambiateapp.presentation.wardrobe.PrendaDetailRoute
 import com.example.cambiateapp.presentation.wardrobe.WardrobeListRoute
 
@@ -76,14 +77,10 @@ fun AppNavHost(
                     defaultValue = null
                 }
             )
-        ) { entrada ->
-            val id = entrada.arguments?.getString(Ruta.AltaEdicion.ARG_ID)
-            PantallaPlaceholder(
-                titulo = if (id == null) "Nueva prenda" else "Editando la prenda: $id",
-                botones = listOf(
-                    BotonPlaceholder("Guardar (simulado)") { navController.popBackStack() },
-                    BotonPlaceholder("Volver") { navController.popBackStack() }
-                )
+        ) {
+            AltaEdicionRoute(
+                onGuardado = { navController.popBackStack() },
+                onVolver = { navController.popBackStack() }
             )
         }
 
