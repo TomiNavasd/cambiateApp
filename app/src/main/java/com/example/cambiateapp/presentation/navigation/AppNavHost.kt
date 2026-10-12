@@ -64,6 +64,7 @@ fun AppNavHost(
         ) {
             PrendaDetailRoute(
                 onEditar = { id -> navController.navigate(Ruta.AltaEdicion.crear(id)) },
+                onEliminada = { navController.popBackStack() },
                 onVolver = { navController.popBackStack() }
             )
         }
