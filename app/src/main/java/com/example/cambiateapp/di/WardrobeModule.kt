@@ -1,6 +1,6 @@
 package com.example.cambiateapp.di
 
-import com.example.cambiateapp.data.repository.FakePrendaRepository
+import com.example.cambiateapp.data.repository.PrendaRepositoryImpl
 import com.example.cambiateapp.domain.repository.PrendaRepository
 import dagger.Binds
 import dagger.Module
@@ -12,5 +12,5 @@ import dagger.hilt.components.SingletonComponent
 abstract class WardrobeModule {
 
     @Binds
-    abstract fun bindPrendaRepository(impl: FakePrendaRepository): PrendaRepository
+    abstract fun bindPrendaRepository(impl: PrendaRepositoryImpl): PrendaRepository
 }
