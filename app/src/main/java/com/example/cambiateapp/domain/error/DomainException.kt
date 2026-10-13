@@ -1,7 +1,6 @@
 package com.example.cambiateapp.domain.error
 
-enum class CampoInvalido { NOMBRE, CATEGORIA, FOTO, EMAIL, CONTRASENA }
-
+enum class CampoInvalido { NOMBRE, CATEGORIA, FOTO, EMAIL, CONTRASENA, PRENDAS }
 sealed class DomainException(cause: Throwable? = null) : Exception(cause) {
     object CredencialesInvalidas : DomainException()
     object EmailYaRegistrado : DomainException()
