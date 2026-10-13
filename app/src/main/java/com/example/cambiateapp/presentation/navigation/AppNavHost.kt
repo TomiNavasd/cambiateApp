@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.cambiateapp.presentation.auth.LoginRoute
 import com.example.cambiateapp.presentation.auth.RegisterRoute
+import com.example.cambiateapp.presentation.outfits.OutfitsRoute
 import com.example.cambiateapp.presentation.wardrobe.AltaEdicionRoute
 import com.example.cambiateapp.presentation.wardrobe.PrendaDetailRoute
 import com.example.cambiateapp.presentation.wardrobe.WardrobeListRoute
@@ -52,6 +53,7 @@ fun AppNavHost(
             WardrobeListRoute(
                 onPrendaClick = { id -> navController.navigate(Ruta.Detalle.crear(id)) },
                 onNuevaClick = { navController.navigate(Ruta.AltaEdicion.crear()) },
+                onOutfitsClick = { navController.navigate(Ruta.Outfits.route) },
                 onCerrarSesion = onCerrarSesion
             )
         }
@@ -86,12 +88,7 @@ fun AppNavHost(
         }
 
         composable(Ruta.Outfits.route) {
-            PantallaPlaceholder(
-                titulo = "Outfits",
-                botones = listOf(
-                    BotonPlaceholder("Volver") { navController.popBackStack() }
-                )
-            )
+            OutfitsRoute(onVolver = { navController.popBackStack() })
         }
     }
 }
