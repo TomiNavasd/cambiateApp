@@ -18,5 +18,8 @@ sealed class Ruta(val route: String) {
     }
     data object Outfits : Ruta("outfits")
     data object Notificaciones : Ruta("notificaciones")
+    data object Mapa : Ruta("mapa")
+
+
 
 }
