@@ -11,10 +11,12 @@ sealed class Ruta(val route: String) {
         fun crear(id: String) = "detalle/$id"
     }
 
-    /** El id es opcional: sin id es una prenda nueva; con id, se edita esa prenda. */
+
     data object AltaEdicion : Ruta("alta_edicion?id={id}") {
         const val ARG_ID = "id"
         fun crear(id: String? = null) = if (id == null) "alta_edicion" else "alta_edicion?id=$id"
     }
     data object Outfits : Ruta("outfits")
+    data object Notificaciones : Ruta("notificaciones")
+
 }
