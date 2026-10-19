@@ -7,24 +7,35 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,7 +45,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.cambiateapp.ui.theme.CambiateAppTheme
 
-/** Capa con estado: conecta el ViewModel y se ocupa del permiso (que es cosa de Android/UI). */
 @Composable
 fun NotificacionesRoute(
     onVolver: () -> Unit,
@@ -43,44 +53,57 @@ fun NotificacionesRoute(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
+    // Qué había que hacer cuando se pidió el permiso, para hacerlo si el usuario acepta.
+    var accionPendiente by remember { mutableStateOf<NotificacionesUiEvent?>(null) }
+
     val pedirPermiso = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { concedido ->
+        val accion = accionPendiente
+        accionPendiente = null
         viewModel.onEvent(
-            if (concedido) NotificacionesUiEvent.ProbarAhora else NotificacionesUiEvent.PermisoRechazado
+            if (concedido && accion != null) accion else NotificacionesUiEvent.PermisoRechazado
         )
+    }
+
+    fun ejecutarConPermiso(evento: NotificacionesUiEvent) {
+        val faltaPermiso = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+        if (faltaPermiso) {
+            accionPendiente = evento
+            pedirPermiso.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            viewModel.onEvent(evento)
+        }
     }
 
     NotificacionesScreen(
         state = state,
-        onEvent = viewModel::onEvent,
-        onProbarClick = {
-            val faltaPermiso = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                    ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.POST_NOTIFICATIONS
-                    ) != PackageManager.PERMISSION_GRANTED
-            if (faltaPermiso) {
-                pedirPermiso.launch(Manifest.permission.POST_NOTIFICATIONS)
-            } else {
-                viewModel.onEvent(NotificacionesUiEvent.ProbarAhora)
+        onEvent = { evento ->
+            when {
+                evento == NotificacionesUiEvent.ProbarAhora -> ejecutarConPermiso(evento)
+                evento is NotificacionesUiEvent.ActivarCambiado && evento.activo -> ejecutarConPermiso(evento)
+                else -> viewModel.onEvent(evento)
             }
         },
         onVolver = onVolver
     )
 }
 
-/** Pantalla "tonta": dibuja el estado y manda eventos hacia arriba. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificacionesScreen(
     state: NotificacionesUiState,
     onEvent: (NotificacionesUiEvent) -> Unit,
-    onProbarClick: () -> Unit,
     onVolver: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    // Estado puramente visual: si el selector de hora está abierto.
+    var selectorAbierto by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.aviso) {
         state.aviso?.let {
@@ -116,12 +139,60 @@ fun NotificacionesScreen(
         ) {
             Text("Aviso del clima", style = MaterialTheme.typography.titleMedium)
             Text(
-                text = "Te avisamos qué ponerte según el clima de mañana. Probá cómo se ve el aviso:",
+                text = "Te avisamos todos los días qué ponerte según el clima de mañana.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Button(onClick = onProbarClick) { Text("Probar ahora") }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Recibir el aviso diario", style = MaterialTheme.typography.bodyLarge)
+                Switch(
+                    checked = state.activo,
+                    onCheckedChange = { onEvent(NotificacionesUiEvent.ActivarCambiado(it)) }
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Hora del aviso", style = MaterialTheme.typography.bodyLarge)
+                OutlinedButton(onClick = { selectorAbierto = true }) {
+                    Text("%02d:%02d".format(state.hora, state.minuto))
+                }
+            }
+
+            Button(onClick = { onEvent(NotificacionesUiEvent.ProbarAhora) }) {
+                Text("Probar ahora")
+            }
         }
+    }
+
+    if (selectorAbierto) {
+        val horaState = rememberTimePickerState(
+            initialHour = state.hora,
+            initialMinute = state.minuto,
+            is24Hour = true
+        )
+        AlertDialog(
+            onDismissRequest = { selectorAbierto = false },
+            title = { Text("Hora del aviso") },
+            text = { TimePicker(state = horaState) },
+            confirmButton = {
+                TextButton(onClick = {
+                    onEvent(NotificacionesUiEvent.HoraElegida(horaState.hour, horaState.minute))
+                    selectorAbierto = false
+                }) { Text("Aceptar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { selectorAbierto = false }) { Text("Cancelar") }
+            }
+        )
     }
 }
 
@@ -129,6 +200,6 @@ fun NotificacionesScreen(
 @Composable
 private fun PreviewNotificaciones() {
     CambiateAppTheme {
-        NotificacionesScreen(NotificacionesUiState(), {}, {}, {})
+        NotificacionesScreen(NotificacionesUiState(activo = true), {}, {})
     }
 }
