@@ -7,8 +7,11 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
+import com.example.cambiateapp.DeepLinks
 import com.example.cambiateapp.presentation.auth.LoginRoute
 import com.example.cambiateapp.presentation.auth.RegisterRoute
+import com.example.cambiateapp.presentation.notifications.NotificacionesRoute
 import com.example.cambiateapp.presentation.outfits.OutfitsRoute
 import com.example.cambiateapp.presentation.wardrobe.AltaEdicionRoute
 import com.example.cambiateapp.presentation.wardrobe.PrendaDetailRoute
@@ -54,6 +57,7 @@ fun AppNavHost(
                 onPrendaClick = { id -> navController.navigate(Ruta.Detalle.crear(id)) },
                 onNuevaClick = { navController.navigate(Ruta.AltaEdicion.crear()) },
                 onOutfitsClick = { navController.navigate(Ruta.Outfits.route) },
+                onRecordatoriosClick = { navController.navigate(Ruta.Notificaciones.route) },
                 onCerrarSesion = onCerrarSesion
             )
         }
@@ -87,8 +91,15 @@ fun AppNavHost(
             )
         }
 
-        composable(Ruta.Outfits.route) {
+        composable(
+            route = Ruta.Outfits.route,
+            deepLinks = listOf(navDeepLink { uriPattern = DeepLinks.OUTFITS })
+        ) {
             OutfitsRoute(onVolver = { navController.popBackStack() })
+        }
+
+        composable(Ruta.Notificaciones.route) {
+            NotificacionesRoute(onVolver = { navController.popBackStack() })
         }
     }
 }
