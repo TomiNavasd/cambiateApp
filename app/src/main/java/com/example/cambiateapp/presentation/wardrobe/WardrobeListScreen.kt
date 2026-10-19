@@ -55,6 +55,7 @@ fun WardrobeListRoute(
     onNuevaClick: () -> Unit,
     onOutfitsClick: () -> Unit,
     onRecordatoriosClick: () -> Unit,
+    onMapaClick: () -> Unit,
     onCerrarSesion: () -> Unit,
     viewModel: WardrobeViewModel = hiltViewModel()
 ) {
@@ -67,6 +68,7 @@ fun WardrobeListRoute(
         onNuevaClick = onNuevaClick,
         onOutfitsClick = onOutfitsClick,
         onRecordatoriosClick = onRecordatoriosClick,
+        onMapaClick = onMapaClick,
         onCerrarSesion = onCerrarSesion
     )
 }
@@ -81,6 +83,7 @@ fun WardrobeListScreen(
     onNuevaClick: () -> Unit,
     onOutfitsClick: () -> Unit,
     onRecordatoriosClick: () -> Unit,
+    onMapaClick: () -> Unit,
     onCerrarSesion: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -103,6 +106,13 @@ fun WardrobeListScreen(
                         Icon(imageVector = Icons.Rounded.MoreVert, contentDescription = "Más opciones")
                     }
                     DropdownMenu(expanded = menuAbierto, onDismissRequest = { menuAbierto = false }) {
+                        DropdownMenuItem(
+                            text = { Text("Mapa") },
+                            onClick = {
+                                menuAbierto = false
+                                onMapaClick()
+                            }
+                        )
                         DropdownMenuItem(
                             text = { Text("Cerrar sesión") },
                             onClick = {
@@ -239,26 +249,26 @@ private val prendasDeEjemplo = listOf(
 @Composable
 private fun PreviewContenido() {
     CambiateAppTheme {
-        WardrobeListScreen(WardrobeUiState.Contenido(prendasDeEjemplo, null), {}, {}, {}, {}, {}, {})
+        WardrobeListScreen(WardrobeUiState.Contenido(prendasDeEjemplo, null), {}, {}, {}, {}, {}, {}, {})
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun PreviewCargando() {
-    CambiateAppTheme { WardrobeListScreen(WardrobeUiState.Cargando, {}, {}, {}, {}, {}, {}) }
+    CambiateAppTheme { WardrobeListScreen(WardrobeUiState.Cargando, {}, {}, {}, {}, {}, {}, {}) }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun PreviewVacio() {
-    CambiateAppTheme { WardrobeListScreen(WardrobeUiState.Vacio, {}, {}, {}, {}, {}, {}) }
+    CambiateAppTheme { WardrobeListScreen(WardrobeUiState.Vacio, {}, {}, {}, {}, {}, {}, {}) }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun PreviewError() {
     CambiateAppTheme {
-        WardrobeListScreen(WardrobeUiState.Error("No pudimos cargar tu armario"), {}, {}, {}, {}, {}, {})
+        WardrobeListScreen(WardrobeUiState.Error("No pudimos cargar tu armario"), {}, {}, {}, {}, {}, {}, {})
     }
 }

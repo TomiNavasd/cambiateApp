@@ -11,6 +11,7 @@ import androidx.navigation.navDeepLink
 import com.example.cambiateapp.DeepLinks
 import com.example.cambiateapp.presentation.auth.LoginRoute
 import com.example.cambiateapp.presentation.auth.RegisterRoute
+import com.example.cambiateapp.presentation.map.MapaRoute
 import com.example.cambiateapp.presentation.notifications.NotificacionesRoute
 import com.example.cambiateapp.presentation.outfits.OutfitsRoute
 import com.example.cambiateapp.presentation.wardrobe.AltaEdicionRoute
@@ -58,6 +59,7 @@ fun AppNavHost(
                 onNuevaClick = { navController.navigate(Ruta.AltaEdicion.crear()) },
                 onOutfitsClick = { navController.navigate(Ruta.Outfits.route) },
                 onRecordatoriosClick = { navController.navigate(Ruta.Notificaciones.route) },
+                onMapaClick = { navController.navigate(Ruta.Mapa.route) },
                 onCerrarSesion = onCerrarSesion
             )
         }
@@ -100,6 +102,10 @@ fun AppNavHost(
 
         composable(Ruta.Notificaciones.route) {
             NotificacionesRoute(onVolver = { navController.popBackStack() })
+        }
+
+        composable(Ruta.Mapa.route) {
+            MapaRoute(onVolver = { navController.popBackStack() })
         }
     }
 }
