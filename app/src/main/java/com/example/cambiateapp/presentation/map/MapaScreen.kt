@@ -6,11 +6,29 @@ import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.AutoAwesome
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Thermostat
+import androidx.compose.material.icons.rounded.Umbrella
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -18,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -26,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -35,12 +55,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.cambiateapp.domain.model.ConsejoClima
 import com.example.cambiateapp.domain.model.Coordenadas
+import com.example.cambiateapp.domain.model.Pronostico
 import com.example.cambiateapp.presentation.components.EmptyState
 import com.example.cambiateapp.presentation.components.ErrorState
 import com.example.cambiateapp.presentation.components.LoadingState
 import com.example.cambiateapp.ui.theme.CambiateAppTheme
 import java.io.File
+import kotlin.math.roundToInt
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -53,10 +76,14 @@ import org.osmdroid.views.overlay.Marker
  */
 private val FuenteDeMapa = TileSourceFactory.OpenTopo
 
+/** Desde este porcentaje de lluvia se muestra el paraguas en vez del termómetro. */
+private const val LLUVIA_PARA_PARAGUAS_PCT = 50
+
 /** Capa con estado: conecta el ViewModel y se ocupa del permiso de ubicación. */
 @Composable
 fun MapaRoute(
     onVolver: () -> Unit,
+    onSugerirClick: () -> Unit,
     viewModel: MapaViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -87,6 +114,7 @@ fun MapaRoute(
             )
         },
         onReintentar = { viewModel.onEvent(MapaUiEvent.Reintentar) },
+        onSugerirClick = onSugerirClick,
         onVolver = onVolver
     )
 }
@@ -98,6 +126,7 @@ fun MapaScreen(
     state: MapaUiState,
     onPedirPermiso: () -> Unit,
     onReintentar: () -> Unit,
+    onSugerirClick: () -> Unit,
     onVolver: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -107,6 +136,9 @@ fun MapaScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Mapa", style = MaterialTheme.typography.headlineSmall) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                ),
                 navigationIcon = {
                     IconButton(onClick = onVolver) {
                         Icon(
@@ -142,13 +174,128 @@ fun MapaScreen(
                         text = FuenteDeMapa.copyrightNotice,
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier
-                            .align(Alignment.BottomStart)
+                            .align(Alignment.TopStart)
                             .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f))
                             .padding(4.dp)
+                    )
+                    TarjetaClima(
+                        clima = state.clima,
+                        cargando = state.cargandoClima,
+                        onSugerirClick = onSugerirClick,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .padding(16.dp)
                     )
                 }
             }
         }
+    }
+}
+
+/** Tarjeta sobre el mapa: dónde estás, el clima de mañana y el botón para sugerir outfits. */
+@Composable
+private fun TarjetaClima(
+    clima: ClimaUi?,
+    cargando: Boolean,
+    onSugerirClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Rounded.LocationOn,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "Tu ubicación",
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
+
+            when {
+                clima != null -> ContenidoClima(clima)
+                cargando -> Row(verticalAlignment = Alignment.CenterVertically) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = "Buscando el clima…",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                else -> Text(
+                    text = "No pudimos obtener el clima por ahora.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Button(
+                onClick = onSugerirClick,
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                modifier = Modifier.fillMaxWidth().height(48.dp)
+            ) {
+                Icon(imageVector = Icons.Rounded.AutoAwesome, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Sugerir", style = MaterialTheme.typography.labelLarge)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ContenidoClima(clima: ClimaUi) {
+    val pronostico = clima.pronostico
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Icon(
+            imageVector = if (pronostico.probLluviaPct >= LLUVIA_PARA_PARAGUAS_PCT) Icons.Rounded.Umbrella
+            else Icons.Rounded.Thermostat,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(32.dp)
+        )
+        Column {
+            Text(
+                text = "Mañana · ${pronostico.tempMinC.roundToInt()}° / ${pronostico.tempMaxC.roundToInt()}°",
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(
+                text = "${pronostico.probLluviaPct}% de probabilidad de lluvia",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+    Column {
+        Text(
+            text = clima.consejo.titulo,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium
+        )
+        Text(
+            text = clima.consejo.mensaje,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -223,13 +370,33 @@ private fun configurarOsmdroid(context: Context) {
 @Preview(showBackground = true)
 @Composable
 private fun PreviewSinPermiso() {
-    CambiateAppTheme { MapaScreen(MapaUiState.SinPermiso(), {}, {}, {}) }
+    CambiateAppTheme { MapaScreen(MapaUiState.SinPermiso(), {}, {}, {}, {}) }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun PreviewError() {
     CambiateAppTheme {
-        MapaScreen(MapaUiState.Error("No pudimos obtener tu ubicación."), {}, {}, {})
+        MapaScreen(MapaUiState.Error("No pudimos obtener tu ubicación."), {}, {}, {}, {})
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewTarjetaClima() {
+    CambiateAppTheme {
+        TarjetaClima(
+            clima = ClimaUi(
+                pronostico = Pronostico(tempMinC = 14.0, tempMaxC = 22.0, probLluviaPct = 30),
+                consejo = ConsejoClima(
+                    titulo = "Mañana, clima agradable",
+                    mensaje = "No necesitás abrigo especial. ¡Elegí el outfit que más te guste!",
+                    prendasSugeridas = emptyList()
+                )
+            ),
+            cargando = false,
+            onSugerirClick = {},
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }

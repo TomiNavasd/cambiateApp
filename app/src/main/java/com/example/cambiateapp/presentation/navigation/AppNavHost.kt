@@ -57,10 +57,9 @@ fun AppNavHost(
         composable(Ruta.Lista.route) {
             WardrobeListRoute(
                 onPrendaClick = { id -> navController.navigate(Ruta.Detalle.crear(id)) },
+                onEditarClick = { id -> navController.navigate(Ruta.AltaEdicion.crear(id)) },
                 onNuevaClick = { navController.navigate(Ruta.AltaEdicion.crear()) },
-                onOutfitsClick = { navController.navigate(Ruta.Outfits.route) },
                 onAjustesClick = { navController.navigate(Ruta.Ajustes.route) },
-                onMapaClick = { navController.navigate(Ruta.Mapa.route) },
                 onCerrarSesion = onCerrarSesion
             )
         }
@@ -113,7 +112,16 @@ fun AppNavHost(
         }
 
         composable(Ruta.Mapa.route) {
-            MapaRoute(onVolver = { navController.popBackStack() })
+            MapaRoute(
+                onVolver = { navController.popBackStack() },
+                onSugerirClick = {
+                    navController.navigate(Ruta.Outfits.route) {
+                        popUpTo(Ruta.Lista.route) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
         }
     }
 }
