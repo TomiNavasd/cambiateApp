@@ -47,6 +47,13 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 
+/**
+ * De dónde salen las imágenes del mapa. Si los servidores de OpenStreetMap bloquean los pedidos
+ * (se ven carteles "Access blocked"), cambiar MAPNIK por TileSourceFactory.OpenTopo.
+ */
+private val FuenteDeMapa = TileSourceFactory.OpenTopo
+
+/** Capa con estado: conecta el ViewModel y se ocupa del permiso de ubicación. */
 @Composable
 fun MapaRoute(
     onVolver: () -> Unit,
@@ -84,6 +91,7 @@ fun MapaRoute(
     )
 }
 
+/** Pantalla "tonta": dibuja el estado y avisa con callbacks. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapaScreen(
@@ -129,9 +137,9 @@ fun MapaScreen(
                 )
                 is MapaUiState.Contenido -> {
                     VistaDeMapa(ubicacion = state.ubicacion, modifier = Modifier.fillMaxSize())
-                    // La licencia de OpenStreetMap exige mostrar esta atribución.
+                    // La licencia del mapa exige mostrar esta atribución (sale de la fuente elegida).
                     Text(
-                        text = "© OpenStreetMap contributors",
+                        text = FuenteDeMapa.copyrightNotice,
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier
                             .align(Alignment.BottomStart)
@@ -144,6 +152,7 @@ fun MapaScreen(
     }
 }
 
+/** Mapa de osmdroid (una vista clásica de Android) dentro de Compose. */
 @Composable
 private fun VistaDeMapa(ubicacion: Coordenadas, modifier: Modifier = Modifier) {
     val context = LocalContext.current
@@ -152,7 +161,7 @@ private fun VistaDeMapa(ubicacion: Coordenadas, modifier: Modifier = Modifier) {
     val mapView = remember {
         configurarOsmdroid(context)
         MapView(context).apply {
-            setTileSource(TileSourceFactory.MAPNIK)
+            setTileSource(FuenteDeMapa)
             setMultiTouchControls(true)
             controller.setZoom(16.0)
         }
@@ -199,14 +208,16 @@ private fun tienePermisoDeUbicacion(context: Context): Boolean =
             ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
             PackageManager.PERMISSION_GRANTED
 
+/** osmdroid guarda las imágenes del mapa en la caché de la app (no pide permiso de almacenamiento). */
 private fun configurarOsmdroid(context: Context) {
     val configuracion = Configuration.getInstance()
     configuracion.load(context, context.getSharedPreferences("osmdroid", Context.MODE_PRIVATE))
-    // OpenStreetMap exige identificar a la app que pide las imágenes.
-    configuracion.userAgentValue = context.packageName
+    // Los servidores de mapas piden un User-Agent que identifique a la app.
+    configuracion.userAgentValue = "CambiateApp/1.0 (trabajo practico UNAJ; app Android)"
     val base = File(context.cacheDir, "osmdroid")
     configuracion.osmdroidBasePath = base
-    configuracion.osmdroidTileCache = File(base, "tiles")
+    // Carpeta nueva: así no se reutilizan cuadros bloqueados o con error de pruebas anteriores.
+    configuracion.osmdroidTileCache = File(base, "tiles_v3")
 }
 
 @Preview(showBackground = true)

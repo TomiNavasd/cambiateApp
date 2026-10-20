@@ -4,9 +4,11 @@ import com.example.cambiateapp.AgendadorFake
 import com.example.cambiateapp.MainDispatcherRule
 import com.example.cambiateapp.NotificadorFake
 import com.example.cambiateapp.RecordatorioRepositoryFake
+import com.example.cambiateapp.UbicacionRepositoryFake
 import com.example.cambiateapp.domain.usecase.ConfigurarRecordatorioUseCase
 import com.example.cambiateapp.domain.usecase.EnviarNotificacionDePruebaUseCase
 import com.example.cambiateapp.domain.usecase.ObservarPreferenciasRecordatorioUseCase
+import com.example.cambiateapp.domain.usecase.ObtenerUbicacionUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
@@ -30,11 +32,13 @@ class NotificacionesViewModelTest {
     private val repositorio = RecordatorioRepositoryFake()
     private val agendador = AgendadorFake()
     private val notificador = NotificadorFake()
+    private val ubicacionRepositorio = UbicacionRepositoryFake()
 
     private fun crearViewModel() = NotificacionesViewModel(
         observarPreferencias = ObservarPreferenciasRecordatorioUseCase(repositorio),
         configurarRecordatorio = ConfigurarRecordatorioUseCase(repositorio, agendador),
         enviarNotificacionDePrueba = EnviarNotificacionDePruebaUseCase(notificador),
+        obtenerUbicacion = ObtenerUbicacionUseCase(ubicacionRepositorio),
     )
 
     /** El estado solo se calcula si alguien lo está mirando: este "observador" hace de pantalla. */
@@ -147,5 +151,53 @@ class NotificacionesViewModelTest {
         advanceUntilIdle()
 
         assertNull(vm.uiState.value.aviso)
+    }
+
+    @Test
+    fun `si conceden la ubicacion se consulta y no se avisa nada`() = runTest {
+        val vm = crearViewModel()
+        observar(vm)
+
+        vm.onEvent(NotificacionesUiEvent.UbicacionConcedida)
+        advanceUntilIdle()
+
+        assertEquals(1, ubicacionRepositorio.consultas)
+        assertNull(vm.uiState.value.aviso)
+    }
+
+    @Test
+    fun `si no se consigue la ubicacion se avisa que revise el GPS`() = runTest {
+        ubicacionRepositorio.ubicacion = null
+        val vm = crearViewModel()
+        observar(vm)
+
+        vm.onEvent(NotificacionesUiEvent.UbicacionConcedida)
+        advanceUntilIdle()
+
+        assertTrue(vm.uiState.value.aviso!!.contains("GPS"))
+    }
+
+    @Test
+    fun `si falla la consulta de ubicacion se avisa sin cerrarse`() = runTest {
+        ubicacionRepositorio.fallar = true
+        val vm = crearViewModel()
+        observar(vm)
+
+        vm.onEvent(NotificacionesUiEvent.UbicacionConcedida)
+        advanceUntilIdle()
+
+        assertEquals("No pudimos obtener tu ubicación.", vm.uiState.value.aviso)
+    }
+
+    @Test
+    fun `si rechazan la ubicacion se avisa`() = runTest {
+        val vm = crearViewModel()
+        observar(vm)
+
+        vm.onEvent(NotificacionesUiEvent.UbicacionRechazada)
+        advanceUntilIdle()
+
+        assertTrue(vm.uiState.value.aviso!!.contains("Sin tu ubicación"))
+        assertEquals(0, ubicacionRepositorio.consultas)
     }
 }

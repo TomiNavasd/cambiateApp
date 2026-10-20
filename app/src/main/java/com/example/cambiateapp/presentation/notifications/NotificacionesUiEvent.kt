@@ -6,4 +6,6 @@ sealed interface NotificacionesUiEvent {
     data object AvisoMostrado : NotificacionesUiEvent
     data class ActivarCambiado(val activo: Boolean) : NotificacionesUiEvent
     data class HoraElegida(val hora: Int, val minuto: Int) : NotificacionesUiEvent
+    data object UbicacionConcedida : NotificacionesUiEvent
+    data object UbicacionRechazada : NotificacionesUiEvent
 }

@@ -29,7 +29,7 @@ class WorkManagerAgendadorRecordatorio @Inject constructor(
 
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             NOMBRE_TRABAJO,
-            ExistingPeriodicWorkPolicy.UPDATE,
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
             pedido,
         )
     }
