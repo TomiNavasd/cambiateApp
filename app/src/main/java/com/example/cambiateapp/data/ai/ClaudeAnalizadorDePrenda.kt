@@ -1,5 +1,6 @@
 package com.example.cambiateapp.data.ai
 
+import android.util.Log
 import com.example.cambiateapp.domain.error.DomainException
 import com.example.cambiateapp.domain.model.Categoria
 import com.example.cambiateapp.domain.model.VocabularioEtiquetas
@@ -26,16 +27,28 @@ class ClaudeAnalizadorDePrenda(
     constructor(@Named(CLAVE_ANTHROPIC) apiKey: String) : this(apiKey, crearCliente())
 
     override suspend fun analizar(fotoUrl: String, categoria: Categoria): Result<List<String>> {
-        if (apiKey.isBlank()) return Result.failure(DomainException.SinPermisos)
+        Log.d(TAG, "Analizando foto: $fotoUrl (clave cargada: ${apiKey.isNotBlank()})")
+        if (apiKey.isBlank()) {
+            Log.w(TAG, "La clave de Anthropic está VACÍA (revisá local.properties)")
+            return Result.failure(DomainException.SinPermisos)
+        }
         return try {
-            Result.success(RespuestaEtiquetasParser.parsear(consultar(fotoUrl, categoria)))
+            val texto = consultar(fotoUrl, categoria)
+            Log.d(TAG, "Respuesta de Claude: $texto")
+            val etiquetas = RespuestaEtiquetasParser.parsear(texto)
+            Log.d(TAG, "Etiquetas interpretadas: $etiquetas")
+            Result.success(etiquetas)
         } catch (e: CancellationException) {
+            Log.w(TAG, "Análisis cancelado (¿pasaron los 20 segundos?)")
             throw e
         } catch (e: DomainException) {
+            Log.w(TAG, "Error de dominio: $e")
             Result.failure(e)
         } catch (e: IOException) {
+            Log.w(TAG, "Error de red", e)
             Result.failure(DomainException.SinConexion)
         } catch (e: Exception) {
+            Log.w(TAG, "Error inesperado", e)
             Result.failure(DomainException.Desconocido(e))
         }
     }
@@ -72,7 +85,10 @@ class ClaudeAnalizadorDePrenda(
 
         client.newCall(request).await().use { response ->
             val respuesta = response.body?.string().orEmpty()
-            if (!response.isSuccessful) throw errorHttp(response.code)
+            if (!response.isSuccessful) {
+                Log.w(TAG, "Claude respondió HTTP ${response.code}: $respuesta")
+                throw errorHttp(response.code)
+            }
             return extraerTexto(respuesta)
         }
     }
@@ -99,6 +115,7 @@ class ClaudeAnalizadorDePrenda(
     }
 
     private companion object {
+        const val TAG = "ClaudeAnalizador"
         const val URL_API = "https://api.anthropic.com/v1/messages"
         const val VERSION_API = "2023-06-01"
         const val MODELO = "claude-haiku-4-5-20251001" // barato y rápido; entiende imágenes
