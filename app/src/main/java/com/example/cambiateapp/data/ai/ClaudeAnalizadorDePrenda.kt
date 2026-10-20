@@ -27,28 +27,21 @@ class ClaudeAnalizadorDePrenda(
     constructor(@Named(CLAVE_ANTHROPIC) apiKey: String) : this(apiKey, crearCliente())
 
     override suspend fun analizar(fotoUrl: String, categoria: Categoria): Result<List<String>> {
-        Log.d(TAG, "Analizando foto: $fotoUrl (clave cargada: ${apiKey.isNotBlank()})")
         if (apiKey.isBlank()) {
-            Log.w(TAG, "La clave de Anthropic está VACÍA (revisá local.properties)")
+            Log.w(TAG, "La clave de Anthropic está vacía (revisá ANTHROPIC_API_KEY en local.properties)")
             return Result.failure(DomainException.SinPermisos)
         }
         return try {
-            val texto = consultar(fotoUrl, categoria)
-            Log.d(TAG, "Respuesta de Claude: $texto")
-            val etiquetas = RespuestaEtiquetasParser.parsear(texto)
-            Log.d(TAG, "Etiquetas interpretadas: $etiquetas")
-            Result.success(etiquetas)
+            Result.success(RespuestaEtiquetasParser.parsear(consultar(fotoUrl, categoria)))
         } catch (e: CancellationException) {
-            Log.w(TAG, "Análisis cancelado (¿pasaron los 20 segundos?)")
             throw e
         } catch (e: DomainException) {
-            Log.w(TAG, "Error de dominio: $e")
             Result.failure(e)
         } catch (e: IOException) {
-            Log.w(TAG, "Error de red", e)
+            Log.w(TAG, "No pudimos conectar con Claude", e)
             Result.failure(DomainException.SinConexion)
         } catch (e: Exception) {
-            Log.w(TAG, "Error inesperado", e)
+            Log.w(TAG, "Error inesperado al analizar la prenda", e)
             Result.failure(DomainException.Desconocido(e))
         }
     }
