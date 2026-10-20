@@ -9,7 +9,10 @@ class AuthRepositorySpy : AuthRepository {
 
     var llamadasLogin = 0
     var llamadasRegistrar = 0
+    var llamadasRecuperacion = 0
     var ultimoEmail: String? = null
+
+    var resultadoRecuperacion: Result<Unit> = Result.success(Unit)
 
     override val usuarioActual: Flow<User?> = flowOf(null)
 
@@ -23,6 +26,12 @@ class AuthRepositorySpy : AuthRepository {
         llamadasRegistrar++
         ultimoEmail = email
         return Result.success(User(id = "uid-prueba", email = email))
+    }
+
+    override suspend fun enviarRecuperacionContrasena(email: String): Result<Unit> {
+        llamadasRecuperacion++
+        ultimoEmail = email
+        return resultadoRecuperacion
     }
 
     override fun cerrarSesion() {}

@@ -7,5 +7,8 @@ interface AuthRepository {
     val usuarioActual: Flow<User?>
     suspend fun login(email: String, pass: String): Result<User>
     suspend fun registrar(email: String, pass: String): Result<User>
+
+    suspend fun enviarRecuperacionContrasena(email: String): Result<Unit>
+
     fun cerrarSesion()
 }

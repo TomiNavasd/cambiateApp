@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cambiateapp.domain.error.CampoInvalido
 import com.example.cambiateapp.domain.error.DomainException
+import com.example.cambiateapp.domain.usecase.EnviarRecuperacionContrasenaUseCase
 import com.example.cambiateapp.domain.usecase.LoginUseCase
 import com.example.cambiateapp.domain.usecase.RegisterUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +18,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
-    private val registerUseCase: RegisterUseCase
+    private val registerUseCase: RegisterUseCase,
+    private val enviarRecuperacionContrasena: EnviarRecuperacionContrasenaUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthUiState())
@@ -43,6 +45,24 @@ class AuthViewModel @Inject constructor(
                 _uiState.update {
                     if (it.estado is AuthEstado.Error) it.copy(estado = AuthEstado.Inactivo) else it
                 }
+
+            AuthUiEvent.RecuperarClick -> abrirRecuperacion()
+
+            is AuthUiEvent.RecuperarEmailCambio ->
+                _uiState.update {
+                    it.copy(recuperacion = it.recuperacion.copy(email = event.valor, error = null))
+                }
+
+            AuthUiEvent.RecuperarEnviarClick -> enviarRecuperacion()
+
+            AuthUiEvent.RecuperarCancelar ->
+                _uiState.update {
+                    // Mientras se está enviando no dejamos cerrar, para no perder el resultado.
+                    if (it.recuperacion.enviando) it else it.copy(recuperacion = RecuperacionUiState())
+                }
+
+            AuthUiEvent.MensajeMostrado ->
+                _uiState.update { it.copy(mensaje = null) }
         }
     }
 
@@ -72,7 +92,46 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    // Traduce los errores del dominio a mensajes para mostrar en pantalla.
+    private fun abrirRecuperacion() {
+        _uiState.update {
+            it.copy(recuperacion = RecuperacionUiState(abierta = true, email = it.email))
+        }
+    }
+
+    private fun enviarRecuperacion() {
+        val actual = _uiState.value.recuperacion
+        if (actual.enviando) return
+        _uiState.update { it.copy(recuperacion = it.recuperacion.copy(enviando = true, error = null)) }
+        viewModelScope.launch {
+            enviarRecuperacionContrasena(actual.email)
+                .onSuccess {
+
+                    _uiState.update {
+                        it.copy(
+                            recuperacion = RecuperacionUiState(),
+                            mensaje = "Si el mail está registrado, te enviamos un link para elegir una contraseña nueva"
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _uiState.update {
+                        it.copy(
+                            recuperacion = it.recuperacion.copy(
+                                enviando = false,
+                                error = mensajeRecuperacion(error)
+                            )
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun mensajeRecuperacion(error: Throwable): String = when (error) {
+        DomainException.EmailInvalido -> "Ingresá un email válido"
+        DomainException.SinConexion -> "Sin conexión. Revisá tu internet e intentá de nuevo"
+        else -> "No pudimos enviar el mail. Intentá de nuevo"
+    }
+
     private fun aplicarError(state: AuthUiState, error: Throwable): AuthUiState {
         val inactivo = state.copy(estado = AuthEstado.Inactivo)
         return when (error) {

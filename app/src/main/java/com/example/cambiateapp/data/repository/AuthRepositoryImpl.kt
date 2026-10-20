@@ -58,6 +58,24 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun enviarRecuperacionContrasena(email: String): Result<Unit> {
+        return try {
+            firebaseAuth.sendPasswordResetEmail(email).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            when (e) {
+                // Si el mail no está registrado, respondemos igual que si hubiera salido bien:
+                // así nadie puede usar esta pantalla para averiguar qué mails tienen cuenta.
+                is FirebaseAuthInvalidUserException -> Result.success(Unit)
+                // Acá "credenciales inválidas" significa que el mail está mal escrito.
+                is FirebaseAuthInvalidCredentialsException ->
+                    Result.failure(DomainException.EmailInvalido)
+                else -> Result.failure(traducirError(e))
+            }
+        }
+    }
+
     override fun cerrarSesion() {
         firebaseAuth.signOut()
     }

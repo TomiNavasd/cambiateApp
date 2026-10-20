@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -12,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Email
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -75,6 +77,14 @@ fun LoginScreen(
         }
     }
 
+    // Igual que el anterior, pero para avisos de éxito (por ejemplo "te enviamos el mail").
+    LaunchedEffect(state.mensaje) {
+        state.mensaje?.let {
+            snackbarHostState.showSnackbar(it)
+            onEvent(AuthUiEvent.MensajeMostrado)
+        }
+    }
+
     Scaffold(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
@@ -120,7 +130,19 @@ fun LoginScreen(
                 imeAction = ImeAction.Done,
                 keyboardActions = KeyboardActions(onDone = { onEvent(AuthUiEvent.LoginClick) })
             )
-            Spacer(Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(onClick = { onEvent(AuthUiEvent.RecuperarClick) }) {
+                    Text(
+                        text = "¿Olvidaste tu contraseña?",
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
+            }
+            Spacer(Modifier.height(8.dp))
 
             PrimaryButton(
                 texto = "Iniciar sesión",
@@ -141,6 +163,59 @@ fun LoginScreen(
             }
         }
     }
+
+    if (state.recuperacion.abierta) {
+        RecuperarContrasenaDialog(
+            state = state.recuperacion,
+            onEvent = onEvent
+        )
+    }
+}
+
+/** Diálogo para pedir el mail al que se manda el link de recuperación. */
+@Composable
+private fun RecuperarContrasenaDialog(
+    state: RecuperacionUiState,
+    onEvent: (AuthUiEvent) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { onEvent(AuthUiEvent.RecuperarCancelar) },
+        title = { Text("Recuperar contraseña") },
+        text = {
+            Column {
+                Text(
+                    text = "Ingresá tu email y te mandamos un link para elegir una contraseña nueva.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(16.dp))
+                AppTextField(
+                    value = state.email,
+                    onValueChange = { onEvent(AuthUiEvent.RecuperarEmailCambio(it)) },
+                    label = "Email",
+                    leadingIcon = Icons.Rounded.Email,
+                    error = state.error,
+                    keyboardType = KeyboardType.Email
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onEvent(AuthUiEvent.RecuperarEnviarClick) },
+                enabled = !state.enviando
+            ) {
+                Text(if (state.enviando) "Enviando..." else "Enviar")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = { onEvent(AuthUiEvent.RecuperarCancelar) },
+                enabled = !state.enviando
+            ) {
+                Text("Cancelar")
+            }
+        }
+    )
 }
 
 @Preview(showBackground = true)
@@ -149,6 +224,21 @@ private fun LoginScreenPreview() {
     CambiateAppTheme {
         LoginScreen(
             state = AuthUiState(email = "ana@ejemplo.com", emailError = "Ingresá un email válido"),
+            onEvent = {},
+            onIrARegistro = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LoginScreenRecuperacionPreview() {
+    CambiateAppTheme {
+        LoginScreen(
+            state = AuthUiState(
+                email = "ana@ejemplo.com",
+                recuperacion = RecuperacionUiState(abierta = true, email = "ana@ejemplo.com")
+            ),
             onEvent = {},
             onIrARegistro = {}
         )
