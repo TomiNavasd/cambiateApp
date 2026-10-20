@@ -11,6 +11,7 @@ data class PrendaDto(
     val categoria: String = "",
     val colores: List<String> = emptyList(),
     val ocasiones: List<String> = emptyList(),
+    val etiquetas: List<String> = emptyList(),
     val temporada: String = "",
     val fotoUrl: String = "",
     val vecesUsada: Int = 0,

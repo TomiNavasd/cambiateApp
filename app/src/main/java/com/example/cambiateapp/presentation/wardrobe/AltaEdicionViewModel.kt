@@ -30,6 +30,9 @@ class AltaEdicionViewModel @Inject constructor(
     // null = prenda nueva; con valor = editamos esa prenda.
     private val prendaId: String? = savedStateHandle.get<String>(Ruta.AltaEdicion.ARG_ID)
 
+    // Etiquetas de la IA: no se ven en pantalla, pero hay que conservarlas al editar.
+    private var etiquetas: List<String> = emptyList()
+
     private val _uiState = MutableStateFlow(
         AltaEdicionUiState(esEdicion = prendaId != null, cargando = prendaId != null)
     )
@@ -69,6 +72,7 @@ class AltaEdicionViewModel @Inject constructor(
                 if (prenda == null) {
                     _uiState.update { it.copy(cargando = false, noEncontrada = true) }
                 } else {
+                    etiquetas = prenda.etiquetas
                     _uiState.update {
                         it.copy(
                             cargando = false,
@@ -125,7 +129,8 @@ class AltaEdicionViewModel @Inject constructor(
                 categoria = actual.categoria,
                 colores = parsearColores(actual.colores),
                 ocasiones = Ocasion.entries.filter { it in actual.ocasiones },
-                fotoUrl = fotoUrl
+                fotoUrl = fotoUrl,
+                etiquetas = etiquetas
             )
             savePrenda(prenda).fold(
                 onSuccess = {

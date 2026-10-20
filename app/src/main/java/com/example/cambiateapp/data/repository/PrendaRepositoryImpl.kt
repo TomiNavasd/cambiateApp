@@ -107,6 +107,6 @@ class PrendaRepositoryImpl @Inject constructor(
     private companion object {
         const val COLECCION = "prendas"
         const val TIMEOUT_MS = 10_000L
-        val CAMPOS_EDITABLES = listOf("nombre", "descripcion", "categoria", "colores", "ocasiones", "fotoUrl")
+        val CAMPOS_EDITABLES = listOf("nombre", "descripcion", "categoria", "colores", "ocasiones", "fotoUrl", "etiquetas")
     }
 }
