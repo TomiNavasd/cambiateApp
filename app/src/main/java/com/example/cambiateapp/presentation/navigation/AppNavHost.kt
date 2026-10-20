@@ -112,7 +112,16 @@ fun AppNavHost(
         }
 
         composable(Ruta.Mapa.route) {
-            MapaRoute(onVolver = { navController.popBackStack() })
+            MapaRoute(
+                onVolver = { navController.popBackStack() },
+                onSugerirClick = {
+                    navController.navigate(Ruta.Outfits.route) {
+                        popUpTo(Ruta.Lista.route) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
         }
     }
 }
