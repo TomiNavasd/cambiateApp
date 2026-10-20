@@ -9,6 +9,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
+import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -58,6 +59,19 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun loginConGoogle(idToken: String): Result<User> {
+        return try {
+            val credencial = GoogleAuthProvider.getCredential(idToken, null)
+            val resultado = firebaseAuth.signInWithCredential(credencial).await()
+            val firebaseUser = resultado.user
+                ?: return Result.failure(DomainException.Desconocido())
+            Result.success(User(id = firebaseUser.uid, email = firebaseUser.email.orEmpty()))
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            Result.failure(traducirError(e))
+        }
+    }
+
     override suspend fun enviarRecuperacionContrasena(email: String): Result<Unit> {
         return try {
             firebaseAuth.sendPasswordResetEmail(email).await()
@@ -65,10 +79,7 @@ class AuthRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             if (e is CancellationException) throw e
             when (e) {
-                // Si el mail no está registrado, respondemos igual que si hubiera salido bien:
-                // así nadie puede usar esta pantalla para averiguar qué mails tienen cuenta.
                 is FirebaseAuthInvalidUserException -> Result.success(Unit)
-                // Acá "credenciales inválidas" significa que el mail está mal escrito.
                 is FirebaseAuthInvalidCredentialsException ->
                     Result.failure(DomainException.EmailInvalido)
                 else -> Result.failure(traducirError(e))

@@ -8,6 +8,8 @@ interface AuthRepository {
     suspend fun login(email: String, pass: String): Result<User>
     suspend fun registrar(email: String, pass: String): Result<User>
 
+    suspend fun loginConGoogle(idToken: String): Result<User>
+
     suspend fun enviarRecuperacionContrasena(email: String): Result<Unit>
 
     fun cerrarSesion()

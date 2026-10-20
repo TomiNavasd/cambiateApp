@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -24,19 +25,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.cambiateapp.R
 import com.example.cambiateapp.presentation.components.AppLogo
 import com.example.cambiateapp.presentation.components.AppTextField
 import com.example.cambiateapp.presentation.components.PasswordTextField
 import com.example.cambiateapp.presentation.components.PrimaryButton
 import com.example.cambiateapp.ui.theme.CambiateAppTheme
+import kotlinx.coroutines.launch
 
 /** Capa con estado: conecta el ViewModel con la pantalla y avisa cuando el login salió bien. */
 @Composable
@@ -46,6 +52,9 @@ fun LoginRoute(
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val webClientId = stringResource(R.string.default_web_client_id)
 
     LaunchedEffect(state.estado) {
         if (state.estado is AuthEstado.Exito) onLoginExitoso()
@@ -54,22 +63,36 @@ fun LoginRoute(
     LoginScreen(
         state = state,
         onEvent = viewModel::onEvent,
-        onIrARegistro = onIrARegistro
+        onIrARegistro = onIrARegistro,
+        onGoogleClick = {
+            if (!state.estaCargando) {
+                viewModel.onEvent(AuthUiEvent.GoogleIniciado)
+                scope.launch {
+                    when (val resultado = pedirTokenDeGoogle(context, webClientId)) {
+                        is ResultadoGoogle.Token ->
+                            viewModel.onEvent(AuthUiEvent.GoogleTokenObtenido(resultado.idToken))
+                        ResultadoGoogle.Cancelado ->
+                            viewModel.onEvent(AuthUiEvent.GoogleCancelado)
+                        is ResultadoGoogle.Error ->
+                            viewModel.onEvent(AuthUiEvent.GoogleFallo(resultado.mensaje))
+                    }
+                }
+            }
+        }
     )
 }
 
-/** Pantalla "tonta": solo dibuja el estado y manda eventos hacia arriba. */
 @Composable
 fun LoginScreen(
     state: AuthUiState,
     onEvent: (AuthUiEvent) -> Unit,
     onIrARegistro: () -> Unit,
+    onGoogleClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val estado = state.estado
 
-    // Efecto de una sola vez: muestra el error general y avisa al ViewModel que ya se mostró.
     LaunchedEffect(estado) {
         if (estado is AuthEstado.Error) {
             snackbarHostState.showSnackbar(estado.mensaje)
@@ -77,7 +100,6 @@ fun LoginScreen(
         }
     }
 
-    // Igual que el anterior, pero para avisos de éxito (por ejemplo "te enviamos el mail").
     LaunchedEffect(state.mensaje) {
         state.mensaje?.let {
             snackbarHostState.showSnackbar(it)
@@ -149,6 +171,24 @@ fun LoginScreen(
                 onClick = { onEvent(AuthUiEvent.LoginClick) },
                 cargando = state.estaCargando
             )
+            Spacer(Modifier.height(16.dp))
+
+            Text(
+                text = "o",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(16.dp))
+
+            OutlinedButton(
+                onClick = onGoogleClick,
+                enabled = !state.estaCargando,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+            ) {
+                Text(text = "Continuar con Google", style = MaterialTheme.typography.labelLarge)
+            }
             Spacer(Modifier.height(8.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -172,7 +212,6 @@ fun LoginScreen(
     }
 }
 
-/** Diálogo para pedir el mail al que se manda el link de recuperación. */
 @Composable
 private fun RecuperarContrasenaDialog(
     state: RecuperacionUiState,
@@ -225,7 +264,8 @@ private fun LoginScreenPreview() {
         LoginScreen(
             state = AuthUiState(email = "ana@ejemplo.com", emailError = "Ingresá un email válido"),
             onEvent = {},
-            onIrARegistro = {}
+            onIrARegistro = {},
+            onGoogleClick = {}
         )
     }
 }
@@ -240,7 +280,8 @@ private fun LoginScreenRecuperacionPreview() {
                 recuperacion = RecuperacionUiState(abierta = true, email = "ana@ejemplo.com")
             ),
             onEvent = {},
-            onIrARegistro = {}
+            onIrARegistro = {},
+            onGoogleClick = {}
         )
     }
 }
