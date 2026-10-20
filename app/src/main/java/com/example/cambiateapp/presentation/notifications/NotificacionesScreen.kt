@@ -44,6 +44,7 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.cambiateapp.ui.theme.CambiateAppTheme
+import android.content.Context
 
 @Composable
 fun NotificacionesRoute(
@@ -53,6 +54,39 @@ fun NotificacionesRoute(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
+    // Permiso de ubicación: se pide al activar el aviso, para poder saber el clima de tu zona.
+    val pedirUbicacion = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { resultado ->
+        // Alcanza con que acepte la ubicación aproximada o la precisa.
+        viewModel.onEvent(
+            if (resultado.values.any { it }) {
+                NotificacionesUiEvent.UbicacionConcedida
+            } else {
+                NotificacionesUiEvent.UbicacionRechazada
+            }
+        )
+    }
+
+    fun asegurarUbicacion() {
+        if (tienePermisoDeUbicacion(context)) {
+            viewModel.onEvent(NotificacionesUiEvent.UbicacionConcedida)
+        } else {
+            pedirUbicacion.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
+    /** Aplica el evento y, si se está activando el aviso, se asegura de tener la ubicación. */
+    fun aplicar(evento: NotificacionesUiEvent) {
+        viewModel.onEvent(evento)
+        if (evento is NotificacionesUiEvent.ActivarCambiado && evento.activo) asegurarUbicacion()
+    }
+
     // Qué había que hacer cuando se pidió el permiso, para hacerlo si el usuario acepta.
     var accionPendiente by remember { mutableStateOf<NotificacionesUiEvent?>(null) }
 
@@ -61,9 +95,11 @@ fun NotificacionesRoute(
     ) { concedido ->
         val accion = accionPendiente
         accionPendiente = null
-        viewModel.onEvent(
-            if (concedido && accion != null) accion else NotificacionesUiEvent.PermisoRechazado
-        )
+        if (concedido && accion != null) {
+            aplicar(accion)
+        } else {
+            viewModel.onEvent(NotificacionesUiEvent.PermisoRechazado)
+        }
     }
 
     fun ejecutarConPermiso(evento: NotificacionesUiEvent) {
@@ -76,7 +112,7 @@ fun NotificacionesRoute(
             accionPendiente = evento
             pedirPermiso.launch(Manifest.permission.POST_NOTIFICATIONS)
         } else {
-            viewModel.onEvent(evento)
+            aplicar(evento)
         }
     }
 
@@ -92,6 +128,12 @@ fun NotificacionesRoute(
         onVolver = onVolver
     )
 }
+
+private fun tienePermisoDeUbicacion(context: Context): Boolean =
+    ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -6,6 +6,7 @@ import com.example.cambiateapp.domain.model.PreferenciasRecordatorio
 import com.example.cambiateapp.domain.usecase.ConfigurarRecordatorioUseCase
 import com.example.cambiateapp.domain.usecase.EnviarNotificacionDePruebaUseCase
 import com.example.cambiateapp.domain.usecase.ObservarPreferenciasRecordatorioUseCase
+import com.example.cambiateapp.domain.usecase.ObtenerUbicacionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
@@ -22,6 +23,7 @@ class NotificacionesViewModel @Inject constructor(
     observarPreferencias: ObservarPreferenciasRecordatorioUseCase,
     private val configurarRecordatorio: ConfigurarRecordatorioUseCase,
     private val enviarNotificacionDePrueba: EnviarNotificacionDePruebaUseCase,
+    private val obtenerUbicacion: ObtenerUbicacionUseCase,
 ) : ViewModel() {
 
     private val aviso = MutableStateFlow<String?>(null)
@@ -52,6 +54,9 @@ class NotificacionesViewModel @Inject constructor(
             is NotificacionesUiEvent.ActivarCambiado -> guardar(activo = evento.activo)
             is NotificacionesUiEvent.HoraElegida ->
                 guardar(hora = evento.hora, minuto = evento.minuto)
+            NotificacionesUiEvent.UbicacionConcedida -> actualizarUbicacion()
+            NotificacionesUiEvent.UbicacionRechazada ->
+                aviso.value = "Sin tu ubicación no podemos saber el clima de tu zona. Activala en los ajustes del sistema."
         }
     }
 
@@ -74,6 +79,21 @@ class NotificacionesViewModel @Inject constructor(
                 throw e
             } catch (e: Exception) {
                 aviso.value = "No pudimos guardar el recordatorio"
+            }
+        }
+    }
+
+    /** Pide la ubicación actual. Al obtenerla, queda guardada para el aviso en segundo plano. */
+    private fun actualizarUbicacion() {
+        viewModelScope.launch {
+            try {
+                if (obtenerUbicacion() == null) {
+                    aviso.value = "No pudimos obtener tu ubicación. Revisá que el GPS esté activado."
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                aviso.value = "No pudimos obtener tu ubicación."
             }
         }
     }
