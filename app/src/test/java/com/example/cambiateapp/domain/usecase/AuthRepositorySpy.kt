@@ -10,7 +10,9 @@ class AuthRepositorySpy : AuthRepository {
     var llamadasLogin = 0
     var llamadasRegistrar = 0
     var llamadasRecuperacion = 0
+    var llamadasGoogle = 0
     var ultimoEmail: String? = null
+    var ultimoIdToken: String? = null
 
     var resultadoRecuperacion: Result<Unit> = Result.success(Unit)
 
@@ -26,6 +28,12 @@ class AuthRepositorySpy : AuthRepository {
         llamadasRegistrar++
         ultimoEmail = email
         return Result.success(User(id = "uid-prueba", email = email))
+    }
+
+    override suspend fun loginConGoogle(idToken: String): Result<User> {
+        llamadasGoogle++
+        ultimoIdToken = idToken
+        return Result.success(User(id = "uid-google", email = "google@prueba.com"))
     }
 
     override suspend fun enviarRecuperacionContrasena(email: String): Result<Unit> {

@@ -14,4 +14,10 @@ sealed interface AuthUiEvent {
     data object RecuperarEnviarClick : AuthUiEvent
     data object RecuperarCancelar : AuthUiEvent
     data object MensajeMostrado : AuthUiEvent
+
+    // Acceso con Google
+    data object GoogleIniciado : AuthUiEvent
+    data class GoogleTokenObtenido(val idToken: String) : AuthUiEvent
+    data object GoogleCancelado : AuthUiEvent
+    data class GoogleFallo(val mensaje: String) : AuthUiEvent
 }

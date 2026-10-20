@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.cambiateapp.domain.error.CampoInvalido
 import com.example.cambiateapp.domain.error.DomainException
 import com.example.cambiateapp.domain.usecase.EnviarRecuperacionContrasenaUseCase
+import com.example.cambiateapp.domain.usecase.LoginConGoogleUseCase
 import com.example.cambiateapp.domain.usecase.LoginUseCase
 import com.example.cambiateapp.domain.usecase.RegisterUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +20,8 @@ import kotlinx.coroutines.launch
 class AuthViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val registerUseCase: RegisterUseCase,
-    private val enviarRecuperacionContrasena: EnviarRecuperacionContrasenaUseCase
+    private val enviarRecuperacionContrasena: EnviarRecuperacionContrasenaUseCase,
+    private val loginConGoogleUseCase: LoginConGoogleUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthUiState())
@@ -63,6 +65,21 @@ class AuthViewModel @Inject constructor(
 
             AuthUiEvent.MensajeMostrado ->
                 _uiState.update { it.copy(mensaje = null) }
+
+            // Mientras Google muestra su selector, la pantalla queda "cargando" para bloquear doble toque.
+            AuthUiEvent.GoogleIniciado ->
+                _uiState.update { if (it.estaCargando) it else it.copy(estado = AuthEstado.Cargando) }
+
+            is AuthUiEvent.GoogleTokenObtenido -> loginConGoogle(event.idToken)
+
+            // Cerró el selector: volvemos a Inactivo sin mostrar ningún error.
+            AuthUiEvent.GoogleCancelado ->
+                _uiState.update {
+                    if (it.estado is AuthEstado.Cargando) it.copy(estado = AuthEstado.Inactivo) else it
+                }
+
+            is AuthUiEvent.GoogleFallo ->
+                _uiState.update { it.copy(estado = AuthEstado.Error(event.mensaje)) }
         }
     }
 
@@ -92,6 +109,22 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    private fun loginConGoogle(idToken: String) {
+        viewModelScope.launch {
+            loginConGoogleUseCase(idToken)
+                .onSuccess { _uiState.update { it.copy(estado = AuthEstado.Exito) } }
+                .onFailure { error ->
+                    _uiState.update { it.copy(estado = AuthEstado.Error(mensajeGoogle(error))) }
+                }
+        }
+    }
+
+    private fun mensajeGoogle(error: Throwable): String = when (error) {
+        DomainException.SinConexion -> "Sin conexión. Revisá tu internet e intentá de nuevo"
+        DomainException.EmailYaRegistrado -> "Ese email ya está registrado con otro método de acceso"
+        else -> "No pudimos iniciar sesión con Google. Intentá de nuevo"
+    }
+
     private fun abrirRecuperacion() {
         _uiState.update {
             it.copy(recuperacion = RecuperacionUiState(abierta = true, email = it.email))
@@ -105,7 +138,8 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             enviarRecuperacionContrasena(actual.email)
                 .onSuccess {
-
+                    // Cerramos el diálogo y avisamos por snackbar. El texto es el mismo
+                    // exista o no la cuenta (ver AuthRepositoryImpl).
                     _uiState.update {
                         it.copy(
                             recuperacion = RecuperacionUiState(),
@@ -132,6 +166,7 @@ class AuthViewModel @Inject constructor(
         else -> "No pudimos enviar el mail. Intentá de nuevo"
     }
 
+    // Traduce los errores del dominio a mensajes para mostrar en pantalla.
     private fun aplicarError(state: AuthUiState, error: Throwable): AuthUiState {
         val inactivo = state.copy(estado = AuthEstado.Inactivo)
         return when (error) {
