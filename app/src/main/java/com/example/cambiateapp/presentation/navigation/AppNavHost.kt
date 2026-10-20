@@ -14,6 +14,7 @@ import com.example.cambiateapp.presentation.auth.RegisterRoute
 import com.example.cambiateapp.presentation.map.MapaRoute
 import com.example.cambiateapp.presentation.notifications.NotificacionesRoute
 import com.example.cambiateapp.presentation.outfits.OutfitsRoute
+import com.example.cambiateapp.presentation.settings.AjustesRoute
 import com.example.cambiateapp.presentation.wardrobe.AltaEdicionRoute
 import com.example.cambiateapp.presentation.wardrobe.PrendaDetailRoute
 import com.example.cambiateapp.presentation.wardrobe.WardrobeListRoute
@@ -58,7 +59,7 @@ fun AppNavHost(
                 onPrendaClick = { id -> navController.navigate(Ruta.Detalle.crear(id)) },
                 onNuevaClick = { navController.navigate(Ruta.AltaEdicion.crear()) },
                 onOutfitsClick = { navController.navigate(Ruta.Outfits.route) },
-                onRecordatoriosClick = { navController.navigate(Ruta.Notificaciones.route) },
+                onAjustesClick = { navController.navigate(Ruta.Ajustes.route) },
                 onMapaClick = { navController.navigate(Ruta.Mapa.route) },
                 onCerrarSesion = onCerrarSesion
             )
@@ -98,6 +99,13 @@ fun AppNavHost(
             deepLinks = listOf(navDeepLink { uriPattern = DeepLinks.OUTFITS })
         ) {
             OutfitsRoute(onVolver = { navController.popBackStack() })
+        }
+
+        composable(Ruta.Ajustes.route) {
+            AjustesRoute(
+                onVolver = { navController.popBackStack() },
+                onNotificacionesClick = { navController.navigate(Ruta.Notificaciones.route) }
+            )
         }
 
         composable(Ruta.Notificaciones.route) {

@@ -14,7 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -54,7 +54,7 @@ fun WardrobeListRoute(
     onPrendaClick: (String) -> Unit,
     onNuevaClick: () -> Unit,
     onOutfitsClick: () -> Unit,
-    onRecordatoriosClick: () -> Unit,
+    onAjustesClick: () -> Unit,
     onMapaClick: () -> Unit,
     onCerrarSesion: () -> Unit,
     viewModel: WardrobeViewModel = hiltViewModel()
@@ -67,7 +67,7 @@ fun WardrobeListRoute(
         onPrendaClick = onPrendaClick,
         onNuevaClick = onNuevaClick,
         onOutfitsClick = onOutfitsClick,
-        onRecordatoriosClick = onRecordatoriosClick,
+        onAjustesClick = onAjustesClick,
         onMapaClick = onMapaClick,
         onCerrarSesion = onCerrarSesion
     )
@@ -82,7 +82,7 @@ fun WardrobeListScreen(
     onPrendaClick: (String) -> Unit,
     onNuevaClick: () -> Unit,
     onOutfitsClick: () -> Unit,
-    onRecordatoriosClick: () -> Unit,
+    onAjustesClick: () -> Unit,
     onMapaClick: () -> Unit,
     onCerrarSesion: () -> Unit,
     modifier: Modifier = Modifier
@@ -99,8 +99,8 @@ fun WardrobeListScreen(
                 title = { Text("Mi armario", style = MaterialTheme.typography.headlineSmall) },
                 actions = {
                     TextButton(onClick = onOutfitsClick) { Text("Outfits") }
-                    IconButton(onClick = onRecordatoriosClick) {
-                        Icon(imageVector = Icons.Rounded.Notifications, contentDescription = "Recordatorios")
+                    IconButton(onClick = onAjustesClick) {
+                        Icon(imageVector = Icons.Rounded.Settings, contentDescription = "Ajustes")
                     }
                     IconButton(onClick = { menuAbierto = true }) {
                         Icon(imageVector = Icons.Rounded.MoreVert, contentDescription = "Más opciones")
