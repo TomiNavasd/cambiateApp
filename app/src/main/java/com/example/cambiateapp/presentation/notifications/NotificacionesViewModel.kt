@@ -8,6 +8,7 @@ import com.example.cambiateapp.domain.usecase.EnviarNotificacionDePruebaUseCase
 import com.example.cambiateapp.domain.usecase.ObservarPreferenciasRecordatorioUseCase
 import com.example.cambiateapp.domain.usecase.ObtenerUbicacionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.LocalTime
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -69,11 +70,7 @@ class NotificacionesViewModel @Inject constructor(
             try {
                 configurarRecordatorio(PreferenciasRecordatorio(activo, hora, minuto))
                 aviso.update {
-                    if (activo) {
-                        "Recordatorio activado: te avisamos todos los días a las %02d:%02d".format(hora, minuto)
-                    } else {
-                        "Recordatorio desactivado"
-                    }
+                    if (activo) mensajeActivado(hora, minuto) else "Recordatorio desactivado"
                 }
             } catch (e: CancellationException) {
                 throw e
@@ -81,6 +78,18 @@ class NotificacionesViewModel @Inject constructor(
                 aviso.value = "No pudimos guardar el recordatorio"
             }
         }
+    }
+
+    /**
+     * Dice cuándo suena la primera vez según el reloj del dispositivo, así si el reloj
+     * está corrido (por ejemplo, un emulador en otra zona horaria) se nota enseguida.
+     */
+    private fun mensajeActivado(hora: Int, minuto: Int): String {
+        val ahora = LocalTime.now()
+        val cuando = if (ahora.isBefore(LocalTime.of(hora, minuto))) "hoy" else "mañana"
+        return "Recordatorio activado: te avisamos $cuando a las %02d:%02d y después todos los días. "
+            .format(hora, minuto) +
+                "Ahora son %02d:%02d en este dispositivo.".format(ahora.hour, ahora.minute)
     }
 
     /** Pide la ubicación actual. Al obtenerla, queda guardada para el aviso en segundo plano. */
