@@ -7,6 +7,7 @@ import com.example.cambiateapp.domain.error.CampoInvalido
 import com.example.cambiateapp.domain.error.DomainException
 import com.example.cambiateapp.domain.model.Ocasion
 import com.example.cambiateapp.domain.model.Prenda
+import com.example.cambiateapp.domain.usecase.EtiquetarPrendaUseCase
 import com.example.cambiateapp.domain.usecase.GetPrendaUseCase
 import com.example.cambiateapp.domain.usecase.SavePrendaUseCase
 import com.example.cambiateapp.domain.usecase.UploadImageUseCase
@@ -24,11 +25,15 @@ class AltaEdicionViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getPrenda: GetPrendaUseCase,
     private val savePrenda: SavePrendaUseCase,
-    private val uploadImage: UploadImageUseCase
+    private val uploadImage: UploadImageUseCase,
+    private val etiquetarPrenda: EtiquetarPrendaUseCase
 ) : ViewModel() {
 
     // null = prenda nueva; con valor = editamos esa prenda.
     private val prendaId: String? = savedStateHandle.get<String>(Ruta.AltaEdicion.ARG_ID)
+
+    // Etiquetas de la IA: no se ven en pantalla, pero hay que conservarlas al editar.
+    private var etiquetas: List<String> = emptyList()
 
     private val _uiState = MutableStateFlow(
         AltaEdicionUiState(esEdicion = prendaId != null, cargando = prendaId != null)
@@ -69,6 +74,7 @@ class AltaEdicionViewModel @Inject constructor(
                 if (prenda == null) {
                     _uiState.update { it.copy(cargando = false, noEncontrada = true) }
                 } else {
+                    etiquetas = prenda.etiquetas
                     _uiState.update {
                         it.copy(
                             cargando = false,
@@ -117,7 +123,13 @@ class AltaEdicionViewModel @Inject constructor(
                 _uiState.update { it.copy(fotoUrl = fotoUrl, fotoLocalUri = null) }
             }
 
-            // 2) Guardamos la prenda con esa URL.
+            // 2) La IA analiza la foto si es nueva (las etiquetas viejas describían otra foto) o si
+            // la prenda todavía no tiene etiquetas. Se guardan en el campo para no repetir al reintentar.
+            if (fotoLocal != null || etiquetas.isEmpty()) {
+                etiquetas = etiquetarPrenda(fotoUrl, actual.categoria)
+            }
+
+            // 3) Guardamos la prenda con esa URL y esas etiquetas.
             val prenda = Prenda(
                 id = prendaId.orEmpty(),
                 nombre = actual.nombre,
@@ -125,7 +137,8 @@ class AltaEdicionViewModel @Inject constructor(
                 categoria = actual.categoria,
                 colores = parsearColores(actual.colores),
                 ocasiones = Ocasion.entries.filter { it in actual.ocasiones },
-                fotoUrl = fotoUrl
+                fotoUrl = fotoUrl,
+                etiquetas = etiquetas
             )
             savePrenda(prenda).fold(
                 onSuccess = {

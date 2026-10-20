@@ -15,7 +15,8 @@ fun PrendaDto.toDomain(): Prenda? {
         categoria = categoriaDominio,
         colores = colores,
         ocasiones = ocasiones.mapNotNull { it.toOcasionOrNull() },
-        fotoUrl = fotoUrl
+        fotoUrl = fotoUrl,
+        etiquetas = etiquetas
     )
 }
 
@@ -27,7 +28,8 @@ fun Prenda.toDto(userId: String): PrendaDto = PrendaDto(
     categoria = categoria.name.lowercase(),
     colores = colores,
     ocasiones = ocasiones.map { it.name.lowercase() },
-    fotoUrl = fotoUrl
+    fotoUrl = fotoUrl,
+    etiquetas = etiquetas
 )
 
 private fun String.toCategoriaOrNull(): Categoria? =
