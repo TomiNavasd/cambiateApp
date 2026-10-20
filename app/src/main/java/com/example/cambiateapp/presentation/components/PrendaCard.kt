@@ -1,23 +1,36 @@
 package com.example.cambiateapp.presentation.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -28,8 +41,13 @@ fun PrendaCard(
     categoria: String,
     fotoUrl: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    detalle: String? = null,
+    onEditar: (() -> Unit)? = null
 ) {
+    // Estado puramente visual: si el menú de tres puntos está abierto.
+    var menuAbierto by remember { mutableStateOf(false) }
+
     Card(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
@@ -39,34 +57,85 @@ fun PrendaCard(
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
-        AsyncImage(
-            model = fotoUrl,
-            contentDescription = nombre,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(4f / 5f)
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-        )
-        Column(modifier = Modifier.padding(12.dp)) {
-            Text(
-                text = nombre,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(Modifier.height(8.dp))
-            Surface(
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.primaryContainer
+        Column(modifier = Modifier.padding(8.dp)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                Text(
-                    text = categoria,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                AsyncImage(
+                    model = fotoUrl,
+                    contentDescription = nombre,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxWidth().aspectRatio(1f)
                 )
+                if (onEditar != null) {
+                    Box(modifier = Modifier.align(Alignment.TopEnd)) {
+                        IconButton(
+                            onClick = { menuAbierto = true },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.MoreVert,
+                                contentDescription = "Opciones de $nombre",
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = menuAbierto,
+                            onDismissRequest = { menuAbierto = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Ver detalle") },
+                                onClick = {
+                                    menuAbierto = false
+                                    onClick()
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Editar") },
+                                onClick = {
+                                    menuAbierto = false
+                                    onEditar()
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            Column(modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 8.dp, bottom = 4.dp)) {
+                Text(
+                    text = nombre,
+                    style = MaterialTheme.typography.labelLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (detalle != null) {
+                    Text(
+                        text = detalle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Spacer(Modifier.height(8.dp))
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Text(
+                        text = categoria,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                    )
+                }
             }
         }
     }
