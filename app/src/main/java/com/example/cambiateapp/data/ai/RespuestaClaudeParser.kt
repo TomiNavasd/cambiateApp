@@ -10,7 +10,7 @@ import org.json.JSONObject
 
 internal object RespuestaClaudeParser {
 
-    private const val MAX_OUTFITS = 3
+    private const val MAX_OUTFITS = 10
 
     fun parsear(
         texto: String,

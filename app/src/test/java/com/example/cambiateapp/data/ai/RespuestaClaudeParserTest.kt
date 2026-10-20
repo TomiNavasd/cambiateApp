@@ -22,6 +22,7 @@ class RespuestaClaudeParserTest {
 
     private fun parsear(texto: String) =
         RespuestaClaudeParser.parsear(texto, Ocasion.CASUAL, prendas.associate { it.id to it.categoria })
+
     @Test
     fun `una respuesta valida devuelve el outfit con sus prendas`() {
         val resultado = parsear("""{"outfits":[{"prendasIds":["s1","i1","c1","a1"]}]}""")
@@ -68,14 +69,24 @@ class RespuestaClaudeParserTest {
     }
 
     @Test
-    fun `devuelve como maximo tres outfits`() {
-        val outfit = """{"prendasIds":["s1","i1","c1"]}"""
-        val distintos = """{"prendasIds":["s2","i1","c1"]}"""
-        val conAbrigo1 = """{"prendasIds":["s1","i1","c1","a1"]}"""
-        val conAbrigo2 = """{"prendasIds":["s2","i1","c1","a1"]}"""
+    fun `devuelve como maximo diez outfits`() {
+        // 4 superiores x 3 inferiores x 1 calzado = 12 outfits distintos y validos.
+        val superiores = listOf("s1", "s2", "s3", "s4")
+        val inferiores = listOf("i1", "i2", "i3")
+        val armario = superiores.map { it to Categoria.SUPERIOR } +
+                inferiores.map { it to Categoria.INFERIOR } +
+                ("c1" to Categoria.CALZADO)
 
-        val resultado = parsear("""{"outfits":[$outfit,$distintos,$conAbrigo1,$conAbrigo2]}""")
+        val outfitsJson = superiores.flatMap { s ->
+            inferiores.map { i -> """{"prendasIds":["$s","$i","c1"]}""" }
+        }.joinToString(",")
 
-        assertEquals(3, resultado.size)
+        val resultado = RespuestaClaudeParser.parsear(
+            """{"outfits":[$outfitsJson]}""",
+            Ocasion.CASUAL,
+            armario.toMap()
+        )
+
+        assertEquals(10, resultado.size)
     }
 }
