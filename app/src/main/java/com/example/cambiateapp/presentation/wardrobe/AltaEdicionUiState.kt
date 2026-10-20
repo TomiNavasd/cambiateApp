@@ -10,6 +10,8 @@ data class AltaEdicionUiState(
     val errorCarga: String? = null,
     val guardando: Boolean = false,         // subiendo la foto y/o guardando
     val guardadoExitoso: Boolean = false,
+    val analizando: Boolean = false,        // la IA está mirando la foto
+    val avisoEscaneo: String? = null,       // resultado del análisis (se completó / no se pudo)
 
     val nombre: String = "",
     val descripcion: String = "",

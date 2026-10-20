@@ -85,9 +85,10 @@ class ReglasOutfitSuggesterTest {
     }
 
     @Test
-    fun `devuelve como maximo tres outfits y no se repiten`() {
+    fun `devuelve como maximo diez outfits y no se repiten`() {
         runBlocking {
-            val prendas = listOf("1", "2", "3").flatMap { n ->
+            // 4 de cada categoria = 64 combinaciones posibles: el tope de 10 tiene que notarse.
+            val prendas = listOf("1", "2", "3", "4").flatMap { n ->
                 listOf(
                     prenda("s$n", Categoria.SUPERIOR, Ocasion.SALIDA),
                     prenda("i$n", Categoria.INFERIOR, Ocasion.SALIDA),
@@ -97,8 +98,27 @@ class ReglasOutfitSuggesterTest {
 
             val outfits = sugeridor.sugerir(Ocasion.SALIDA, prendas).getOrThrow()
 
-            assertEquals(3, outfits.size)
-            assertEquals(3, outfits.map { it.prendasIds.toSet() }.distinct().size)
+            assertEquals(10, outfits.size)
+            assertEquals(10, outfits.map { it.prendasIds.toSet() }.distinct().size)
+        }
+    }
+
+    @Test
+    fun `con pocas prendas devuelve todas las combinaciones posibles sin repetir`() {
+        runBlocking {
+            // 2 superiores x 2 inferiores x 1 calzado = 4 combinaciones: no se inventan mas.
+            val prendas = listOf(
+                prenda("s1", Categoria.SUPERIOR, Ocasion.CASUAL),
+                prenda("s2", Categoria.SUPERIOR, Ocasion.CASUAL),
+                prenda("i1", Categoria.INFERIOR, Ocasion.CASUAL),
+                prenda("i2", Categoria.INFERIOR, Ocasion.CASUAL),
+                prenda("c1", Categoria.CALZADO, Ocasion.CASUAL)
+            )
+
+            val outfits = sugeridor.sugerir(Ocasion.CASUAL, prendas).getOrThrow()
+
+            assertEquals(4, outfits.size)
+            assertEquals(4, outfits.map { it.prendasIds.toSet() }.distinct().size)
         }
     }
 

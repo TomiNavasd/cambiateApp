@@ -64,7 +64,7 @@ class ReglasOutfitSuggester(private val random: Random) : OutfitSuggester {
     }
 
     private companion object {
-        const val MAX_OUTFITS = 3
-        const val MAX_POR_CATEGORIA = 3
+        const val MAX_OUTFITS = 10
+        const val MAX_POR_CATEGORIA = 4
     }
 }

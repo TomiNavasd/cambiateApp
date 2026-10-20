@@ -5,8 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cambiateapp.domain.error.CampoInvalido
 import com.example.cambiateapp.domain.error.DomainException
+import com.example.cambiateapp.domain.model.AnalisisPrenda
 import com.example.cambiateapp.domain.model.Ocasion
 import com.example.cambiateapp.domain.model.Prenda
+import com.example.cambiateapp.domain.usecase.AnalizarPrendaUseCase
 import com.example.cambiateapp.domain.usecase.EtiquetarPrendaUseCase
 import com.example.cambiateapp.domain.usecase.GetPrendaUseCase
 import com.example.cambiateapp.domain.usecase.SavePrendaUseCase
@@ -26,6 +28,7 @@ class AltaEdicionViewModel @Inject constructor(
     private val getPrenda: GetPrendaUseCase,
     private val savePrenda: SavePrendaUseCase,
     private val uploadImage: UploadImageUseCase,
+    private val analizarPrenda: AnalizarPrendaUseCase,
     private val etiquetarPrenda: EtiquetarPrendaUseCase
 ) : ViewModel() {
 
@@ -34,6 +37,9 @@ class AltaEdicionViewModel @Inject constructor(
 
     // Etiquetas de la IA: no se ven en pantalla, pero hay que conservarlas al editar.
     private var etiquetas: List<String> = emptyList()
+
+    // Si el usuario ya eligió la categoría, el escaneo no se la pisa.
+    private var categoriaTocada = false
 
     private val _uiState = MutableStateFlow(
         AltaEdicionUiState(esEdicion = prendaId != null, cargando = prendaId != null)
@@ -50,8 +56,10 @@ class AltaEdicionViewModel @Inject constructor(
                 _uiState.update { it.copy(nombre = event.valor, errorNombre = null) }
             is AltaEdicionUiEvent.DescripcionCambio ->
                 _uiState.update { it.copy(descripcion = event.valor) }
-            is AltaEdicionUiEvent.CategoriaSeleccionada ->
+            is AltaEdicionUiEvent.CategoriaSeleccionada -> {
+                categoriaTocada = true
                 _uiState.update { it.copy(categoria = event.categoria) }
+            }
             is AltaEdicionUiEvent.ColoresCambio ->
                 _uiState.update { it.copy(colores = event.valor) }
             is AltaEdicionUiEvent.OcasionAlternada -> _uiState.update {
@@ -59,8 +67,10 @@ class AltaEdicionViewModel @Inject constructor(
                 else it.ocasiones + event.ocasion
                 it.copy(ocasiones = nuevas)
             }
-            is AltaEdicionUiEvent.FotoSeleccionada ->
+            is AltaEdicionUiEvent.FotoSeleccionada -> {
                 _uiState.update { it.copy(fotoLocalUri = event.uri, errorFoto = null) }
+                escanear(event.uri)
+            }
             AltaEdicionUiEvent.Guardar -> guardar()
             AltaEdicionUiEvent.ReintentarCarga -> prendaId?.let { cargarPrenda(it) }
         }
@@ -75,6 +85,7 @@ class AltaEdicionViewModel @Inject constructor(
                     _uiState.update { it.copy(cargando = false, noEncontrada = true) }
                 } else {
                     etiquetas = prenda.etiquetas
+                    categoriaTocada = true // la prenda ya existe: su categoría es la que eligió el usuario
                     _uiState.update {
                         it.copy(
                             cargando = false,
@@ -95,9 +106,54 @@ class AltaEdicionViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Sube la foto apenas se elige y le pide a la IA que proponga los datos.
+     * Si la subida falla, la foto queda sin subir y guardar() lo intenta de nuevo, como siempre.
+     */
+    private fun escanear(uri: String) {
+        // Las etiquetas viejas describían otra foto: se descartan y se vuelven a pedir.
+        etiquetas = emptyList()
+        _uiState.update { it.copy(analizando = true, avisoEscaneo = null) }
+
+        viewModelScope.launch {
+            val url = uploadImage(uri).getOrNull()
+            if (url == null) {
+                _uiState.update { it.copy(analizando = false, avisoEscaneo = AVISO_SIN_ESCANEO) }
+                return@launch
+            }
+            // Ya subida: guardamos la URL, así al guardar no se vuelve a subir.
+            _uiState.update { it.copy(fotoUrl = url, fotoLocalUri = null) }
+
+            val analisis = analizarPrenda(url)
+            if (analisis == null) {
+                _uiState.update { it.copy(analizando = false, avisoEscaneo = AVISO_SIN_ESCANEO) }
+                return@launch
+            }
+            etiquetas = analisis.etiquetas
+            _uiState.update {
+                precargar(it, analisis).copy(analizando = false, avisoEscaneo = AVISO_ESCANEO_OK)
+            }
+        }
+    }
+
+    /** Completa solo lo que todavía está vacío: lo que el usuario ya escribió no se toca. */
+    private fun precargar(estado: AltaEdicionUiState, analisis: AnalisisPrenda): AltaEdicionUiState {
+        val nombre = if (estado.nombre.isBlank()) analisis.nombre else estado.nombre
+        return estado.copy(
+            nombre = nombre,
+            errorNombre = if (nombre.isNotBlank()) null else estado.errorNombre,
+            descripcion = if (estado.descripcion.isBlank()) analisis.descripcion else estado.descripcion,
+            colores = if (estado.colores.isBlank()) analisis.colores.joinToString(", ") else estado.colores,
+            ocasiones = if (estado.ocasiones.isEmpty()) analisis.ocasiones.toSet() else estado.ocasiones,
+            categoria = if (!categoriaTocada && analisis.categoria != null) analisis.categoria
+            else estado.categoria
+        )
+    }
+
     private fun guardar() {
         val actual = _uiState.value
-        if (actual.guardando) return
+        // Si la IA todavía está analizando, esperamos: así no se guarda a medias ni se sube dos veces.
+        if (actual.guardando || actual.analizando) return
 
         // Evita subir la foto si el nombre está vacío: no tiene sentido gastar la subida.
         if (actual.nombre.isBlank()) {
@@ -112,7 +168,7 @@ class AltaEdicionViewModel @Inject constructor(
         viewModelScope.launch {
             var fotoUrl = actual.fotoUrl
 
-            // 1) Si eligió una foto nueva, la subimos y nos quedamos con la URL.
+            // 1) Si quedó una foto sin subir (por ejemplo falló la subida al elegirla), la subimos ahora.
             val fotoLocal = actual.fotoLocalUri
             if (fotoLocal != null) {
                 fotoUrl = uploadImage(fotoLocal).getOrElse { error ->
@@ -123,10 +179,9 @@ class AltaEdicionViewModel @Inject constructor(
                 _uiState.update { it.copy(fotoUrl = fotoUrl, fotoLocalUri = null) }
             }
 
-            // 2) La IA analiza la foto si es nueva (las etiquetas viejas describían otra foto) o si
-            // la prenda todavía no tiene etiquetas. Se guardan en el campo para no repetir al reintentar.
-            if (fotoLocal != null || etiquetas.isEmpty()) {
-                etiquetas = etiquetarPrenda(fotoUrl, actual.categoria)
+            // 2) Si todavía no hay etiquetas (el escaneo falló o es una prenda vieja), las pedimos acá.
+            if (etiquetas.isEmpty()) {
+                etiquetas = etiquetarPrenda(fotoUrl)
             }
 
             // 3) Guardamos la prenda con esa URL y esas etiquetas.
@@ -180,5 +235,12 @@ class AltaEdicionViewModel @Inject constructor(
         DomainException.SinPermisos -> "No tenés permiso para modificar esta prenda"
         DomainException.SesionNoIniciada -> "Tu sesión venció. Iniciá sesión de nuevo"
         else -> if (guardando) "No pudimos guardar la prenda" else "No pudimos cargar la prenda"
+    }
+
+    private companion object {
+        const val AVISO_ESCANEO_OK =
+            "Completamos los datos con IA. Revisalos y corregí lo que haga falta."
+        const val AVISO_SIN_ESCANEO =
+            "No pudimos analizar la foto. Completá los datos a mano."
     }
 }
