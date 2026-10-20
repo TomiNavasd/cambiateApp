@@ -29,6 +29,7 @@ import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.material.icons.rounded.PhotoLibrary
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -187,7 +188,10 @@ private fun Formulario(
         SeccionFoto(
             foto = state.fotoMostrada,
             error = state.errorFoto,
-            habilitado = habilitado,
+            // No se puede cambiar la foto mientras se guarda ni mientras la IA analiza la anterior.
+            habilitado = !state.guardando && !state.analizando,
+            analizando = state.analizando,
+            aviso = state.avisoEscaneo,
             onGaleria = onGaleria,
             onCamara = onCamara
         )
@@ -258,7 +262,7 @@ private fun Formulario(
         PrimaryButton(
             texto = "Guardar prenda",
             onClick = { onEvent(AltaEdicionUiEvent.Guardar) },
-            cargando = state.guardando
+            cargando = state.guardando || state.analizando
         )
     }
 }
@@ -268,6 +272,8 @@ private fun SeccionFoto(
     foto: String,
     error: String?,
     habilitado: Boolean,
+    analizando: Boolean,
+    aviso: String?,
     onGaleria: () -> Unit,
     onCamara: () -> Unit
 ) {
@@ -328,6 +334,24 @@ private fun SeccionFoto(
             }
         }
 
+        if (analizando) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "Analizando prenda…",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        } else if (aviso != null) {
+            Text(
+                text = aviso,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
         if (error != null) {
             Text(
                 text = error,
@@ -344,6 +368,14 @@ private fun SeccionFoto(
 @Composable
 private fun PreviewNueva() {
     CambiateAppTheme { AltaEdicionScreen(AltaEdicionUiState(), {}, {}, {}, {}) }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewAnalizando() {
+    CambiateAppTheme {
+        AltaEdicionScreen(AltaEdicionUiState(analizando = true), {}, {}, {}, {})
+    }
 }
 
 @Preview(showBackground = true)
