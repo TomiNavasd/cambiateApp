@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">CambiateApp</string>
+    <string name="sin_conexion_banner">Sin conexión. Tus cambios se sincronizan cuando vuelva internet.</string>
 </resources>
