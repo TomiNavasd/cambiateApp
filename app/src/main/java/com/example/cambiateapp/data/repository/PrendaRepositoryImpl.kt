@@ -4,12 +4,16 @@ import com.example.cambiateapp.data.mapper.toDomain
 import com.example.cambiateapp.data.mapper.toDomainException
 import com.example.cambiateapp.data.mapper.toDto
 import com.example.cambiateapp.data.remote.PrendaDto
+import com.example.cambiateapp.data.remote.confirmarOEncolar
 import com.example.cambiateapp.domain.error.DomainException
 import com.example.cambiateapp.domain.model.Prenda
 import com.example.cambiateapp.domain.repository.PrendaRepository
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.Source
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -55,7 +59,7 @@ class PrendaRepositoryImpl @Inject constructor(
         val uid = auth.currentUser?.uid ?: throw DomainException.SesionNoIniciada
         return try {
             llamarRemoto {
-                val dto = prendas.document(id).get().await().toObject(PrendaDto::class.java)
+                val dto = leerDocumento(id)?.toObject(PrendaDto::class.java)
                 if (dto != null && dto.userId == uid) dto.toDomain() else null
             }
         } catch (e: DomainException.SinPermisos) {
@@ -63,36 +67,45 @@ class PrendaRepositoryImpl @Inject constructor(
         }
     }
 
+
+    private suspend fun leerDocumento(id: String): DocumentSnapshot? {
+        val referencia = prendas.document(id)
+        val enCache = try {
+            referencia.get(Source.CACHE).await()
+        } catch (e: FirebaseFirestoreException) {
+            null // no está en la copia local
+        }
+        if (enCache != null && enCache.exists()) return enCache
+        return referencia.get().await()
+    }
+
     override suspend fun guardarPrenda(prenda: Prenda): Result<Unit> {
         val uid = auth.currentUser?.uid ?: return Result.failure(DomainException.SesionNoIniciada)
         return try {
-            llamarRemoto {
-                val dto = prenda.toDto(uid)
-                if (prenda.esNueva) {
-                    prendas.add(dto).await()
-                } else {
-                    prendas.document(prenda.id)
-                        .set(dto, SetOptions.mergeFields(CAMPOS_EDITABLES))
-                        .await()
-                }
+            val dto = prenda.toDto(uid)
+            if (prenda.esNueva) {
+                prendas.add(dto).confirmarOEncolar()
+            } else {
+                prendas.document(prenda.id)
+                    .set(dto, SetOptions.mergeFields(CAMPOS_EDITABLES))
+                    .confirmarOEncolar()
             }
             Result.success(Unit)
         } catch (e: DomainException) {
             Result.failure(e)
         }
     }
+
     override suspend fun eliminarPrenda(id: String): Result<Unit> {
         if (auth.currentUser == null) return Result.failure(DomainException.SesionNoIniciada)
         return try {
-            llamarRemoto { prendas.document(id).delete().await() }
+            prendas.document(id).delete().confirmarOEncolar()
             Result.success(Unit)
         } catch (e: DomainException) {
             Result.failure(e)
         }
     }
 
-
-    /** Ejecuta una llamada a Firestore con límite de tiempo y errores traducidos al dominio. */
     private suspend fun <T> llamarRemoto(bloque: suspend () -> T): T =
         try {
             withTimeout(TIMEOUT_MS) { bloque() }
