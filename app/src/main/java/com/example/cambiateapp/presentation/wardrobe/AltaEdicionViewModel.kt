@@ -32,13 +32,10 @@ class AltaEdicionViewModel @Inject constructor(
     private val etiquetarPrenda: EtiquetarPrendaUseCase
 ) : ViewModel() {
 
-    // null = prenda nueva; con valor = editamos esa prenda.
     private val prendaId: String? = savedStateHandle.get<String>(Ruta.AltaEdicion.ARG_ID)
 
-    // Etiquetas de la IA: no se ven en pantalla, pero hay que conservarlas al editar.
     private var etiquetas: List<String> = emptyList()
 
-    // Si el usuario ya eligió la categoría, el escaneo no se la pisa.
     private var categoriaTocada = false
 
     private val _uiState = MutableStateFlow(
@@ -106,19 +103,22 @@ class AltaEdicionViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Sube la foto apenas se elige y le pide a la IA que proponga los datos.
-     * Si la subida falla, la foto queda sin subir y guardar() lo intenta de nuevo, como siempre.
-     */
+
     private fun escanear(uri: String) {
-        // Las etiquetas viejas describían otra foto: se descartan y se vuelven a pedir.
         etiquetas = emptyList()
         _uiState.update { it.copy(analizando = true, avisoEscaneo = null) }
 
         viewModelScope.launch {
-            val url = uploadImage(uri).getOrNull()
+            val subida = uploadImage(uri)
+            val url = subida.getOrNull()
             if (url == null) {
-                _uiState.update { it.copy(analizando = false, avisoEscaneo = AVISO_SIN_ESCANEO) }
+                // Sin internet se avisa con claridad; cualquier otra falla usa el aviso general.
+                val aviso = if (subida.exceptionOrNull() === DomainException.SinConexion) {
+                    AVISO_ESCANEO_SIN_INTERNET
+                } else {
+                    AVISO_SIN_ESCANEO
+                }
+                _uiState.update { it.copy(analizando = false, avisoEscaneo = aviso) }
                 return@launch
             }
             // Ya subida: guardamos la URL, así al guardar no se vuelve a subir.
@@ -136,7 +136,6 @@ class AltaEdicionViewModel @Inject constructor(
         }
     }
 
-    /** Completa solo lo que todavía está vacío: lo que el usuario ya escribió no se toca. */
     private fun precargar(estado: AltaEdicionUiState, analisis: AnalisisPrenda): AltaEdicionUiState {
         val nombre = if (estado.nombre.isBlank()) analisis.nombre else estado.nombre
         return estado.copy(
@@ -168,23 +167,19 @@ class AltaEdicionViewModel @Inject constructor(
         viewModelScope.launch {
             var fotoUrl = actual.fotoUrl
 
-            // 1) Si quedó una foto sin subir (por ejemplo falló la subida al elegirla), la subimos ahora.
             val fotoLocal = actual.fotoLocalUri
             if (fotoLocal != null) {
                 fotoUrl = uploadImage(fotoLocal).getOrElse { error ->
                     _uiState.update { aplicarError(it, error, alSubirFoto = true) }
                     return@launch
                 }
-                // Guardamos la URL ya subida: si el guardado falla, al reintentar no se vuelve a subir.
                 _uiState.update { it.copy(fotoUrl = fotoUrl, fotoLocalUri = null) }
             }
 
-            // 2) Si todavía no hay etiquetas (el escaneo falló o es una prenda vieja), las pedimos acá.
             if (etiquetas.isEmpty()) {
                 etiquetas = etiquetarPrenda(fotoUrl)
             }
 
-            // 3) Guardamos la prenda con esa URL y esas etiquetas.
             val prenda = Prenda(
                 id = prendaId.orEmpty(),
                 nombre = actual.nombre,
@@ -224,7 +219,9 @@ class AltaEdicionViewModel @Inject constructor(
                 CampoInvalido.FOTO -> base.copy(errorFoto = "Elegí una foto para la prenda")
                 else -> base.copy(errorGeneral = "Revisá los datos ingresados")
             }
-            alSubirFoto && error !== DomainException.SinConexion ->
+            alSubirFoto && error === DomainException.SinConexion ->
+                base.copy(errorGeneral = ERROR_FOTO_SIN_INTERNET)
+            alSubirFoto ->
                 base.copy(errorGeneral = "No pudimos subir la foto. Intentá de nuevo")
             else -> base.copy(errorGeneral = mensajeDe(error, guardando = true))
         }
@@ -242,5 +239,11 @@ class AltaEdicionViewModel @Inject constructor(
             "Completamos los datos con IA. Revisalos y corregí lo que haga falta."
         const val AVISO_SIN_ESCANEO =
             "No pudimos analizar la foto. Completá los datos a mano."
+        const val AVISO_ESCANEO_SIN_INTERNET =
+            "Sin conexión: la foto nueva necesita internet para analizarse y subirse. " +
+                    "Podés completar los datos a mano y guardar cuando vuelva la conexión."
+        const val ERROR_FOTO_SIN_INTERNET =
+            "La foto nueva necesita internet para subirse. Conectate y volvé a tocar Guardar: " +
+                    "los datos que escribiste no se pierden."
     }
 }
