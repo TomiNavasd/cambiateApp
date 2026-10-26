@@ -2,11 +2,13 @@ package com.example.cambiateapp.presentation.notifications
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cambiateapp.R
 import com.example.cambiateapp.domain.model.PreferenciasRecordatorio
 import com.example.cambiateapp.domain.usecase.ConfigurarRecordatorioUseCase
 import com.example.cambiateapp.domain.usecase.EnviarNotificacionDePruebaUseCase
 import com.example.cambiateapp.domain.usecase.ObservarPreferenciasRecordatorioUseCase
 import com.example.cambiateapp.domain.usecase.ObtenerUbicacionUseCase
+import com.example.cambiateapp.presentation.common.ProveedorDeTextos
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalTime
 import javax.inject.Inject
@@ -25,6 +27,7 @@ class NotificacionesViewModel @Inject constructor(
     private val configurarRecordatorio: ConfigurarRecordatorioUseCase,
     private val enviarNotificacionDePrueba: EnviarNotificacionDePruebaUseCase,
     private val obtenerUbicacion: ObtenerUbicacionUseCase,
+    private val textos: ProveedorDeTextos,
 ) : ViewModel() {
 
     private val aviso = MutableStateFlow<String?>(null)
@@ -43,21 +46,20 @@ class NotificacionesViewModel @Inject constructor(
         when (evento) {
             NotificacionesUiEvent.ProbarAhora -> {
                 val mostrada = enviarNotificacionDePrueba()
-                aviso.value = if (mostrada) {
-                    "Listo, mirá la barra de notificaciones"
-                } else {
-                    "No hay permiso para mostrar notificaciones"
-                }
+                aviso.value = textos.obtener(
+                    if (mostrada) R.string.notif_aviso_probar_ok
+                    else R.string.notif_aviso_sin_permiso_notif
+                )
             }
             NotificacionesUiEvent.PermisoRechazado ->
-                aviso.value = "Sin permiso no podemos avisarte. Activalo en los ajustes del sistema."
+                aviso.value = textos.obtener(R.string.notif_aviso_permiso_rechazado)
             NotificacionesUiEvent.AvisoMostrado -> aviso.value = null
             is NotificacionesUiEvent.ActivarCambiado -> guardar(activo = evento.activo)
             is NotificacionesUiEvent.HoraElegida ->
                 guardar(hora = evento.hora, minuto = evento.minuto)
             NotificacionesUiEvent.UbicacionConcedida -> actualizarUbicacion()
             NotificacionesUiEvent.UbicacionRechazada ->
-                aviso.value = "Sin tu ubicación no podemos saber el clima de tu zona. Activala en los ajustes del sistema."
+                aviso.value = textos.obtener(R.string.notif_aviso_ubicacion_rechazada)
         }
     }
 
@@ -70,39 +72,39 @@ class NotificacionesViewModel @Inject constructor(
             try {
                 configurarRecordatorio(PreferenciasRecordatorio(activo, hora, minuto))
                 aviso.update {
-                    if (activo) mensajeActivado(hora, minuto) else "Recordatorio desactivado"
+                    if (activo) mensajeActivado(hora, minuto)
+                    else textos.obtener(R.string.notif_aviso_desactivado)
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                aviso.value = "No pudimos guardar el recordatorio"
+                aviso.value = textos.obtener(R.string.notif_aviso_error_guardar)
             }
         }
     }
 
-    /**
-     * Dice cuándo suena la primera vez según el reloj del dispositivo, así si el reloj
-     * está corrido (por ejemplo, un emulador en otra zona horaria) se nota enseguida.
-     */
+
     private fun mensajeActivado(hora: Int, minuto: Int): String {
         val ahora = LocalTime.now()
-        val cuando = if (ahora.isBefore(LocalTime.of(hora, minuto))) "hoy" else "mañana"
-        return "Recordatorio activado: te avisamos $cuando a las %02d:%02d y después todos los días. "
-            .format(hora, minuto) +
-                "Ahora son %02d:%02d en este dispositivo.".format(ahora.hour, ahora.minute)
+        val cuando = textos.obtener(
+            if (ahora.isBefore(LocalTime.of(hora, minuto))) R.string.notif_hoy else R.string.notif_manana
+        )
+        return textos.obtener(
+            R.string.notif_aviso_activado,
+            cuando, hora, minuto, ahora.hour, ahora.minute
+        )
     }
 
-    /** Pide la ubicación actual. Al obtenerla, queda guardada para el aviso en segundo plano. */
     private fun actualizarUbicacion() {
         viewModelScope.launch {
             try {
                 if (obtenerUbicacion() == null) {
-                    aviso.value = "No pudimos obtener tu ubicación. Revisá que el GPS esté activado."
+                    aviso.value = textos.obtener(R.string.error_ubicacion_gps)
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                aviso.value = "No pudimos obtener tu ubicación."
+                aviso.value = textos.obtener(R.string.error_ubicacion)
             }
         }
     }

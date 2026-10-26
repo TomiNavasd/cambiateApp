@@ -31,9 +31,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.example.cambiateapp.R
 
 @Composable
 fun PrendaCard(
@@ -45,7 +47,6 @@ fun PrendaCard(
     detalle: String? = null,
     onEditar: (() -> Unit)? = null
 ) {
-    // Estado puramente visual: si el menú de tres puntos está abierto.
     var menuAbierto by remember { mutableStateOf(false) }
 
     Card(
@@ -79,7 +80,7 @@ fun PrendaCard(
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.MoreVert,
-                                contentDescription = "Opciones de $nombre",
+                                contentDescription = stringResource(R.string.prenda_opciones, nombre),
                                 modifier = Modifier.size(18.dp)
                             )
                         }
@@ -88,14 +89,14 @@ fun PrendaCard(
                             onDismissRequest = { menuAbierto = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Ver detalle") },
+                                text = { Text(stringResource(R.string.prenda_ver_detalle)) },
                                 onClick = {
                                     menuAbierto = false
                                     onClick()
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Editar") },
+                                text = { Text(stringResource(R.string.prenda_editar)) },
                                 onClick = {
                                     menuAbierto = false
                                     onEditar()

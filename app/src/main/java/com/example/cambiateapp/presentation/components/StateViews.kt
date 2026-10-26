@@ -21,8 +21,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.cambiateapp.R
 
 @Composable
 fun LoadingState(modifier: Modifier = Modifier) {
@@ -103,7 +105,10 @@ fun ErrorState(
                 .fillMaxWidth()
                 .height(52.dp)
         ) {
-            Text(text = "Reintentar", style = MaterialTheme.typography.labelLarge)
+            Text(
+                text = stringResource(R.string.accion_reintentar),
+                style = MaterialTheme.typography.labelLarge
+            )
         }
     }
 }

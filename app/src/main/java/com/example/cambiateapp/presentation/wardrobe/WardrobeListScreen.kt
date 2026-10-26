@@ -47,11 +47,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.cambiateapp.R
 import com.example.cambiateapp.domain.model.Categoria
 import com.example.cambiateapp.presentation.components.CategoryChip
 import com.example.cambiateapp.presentation.components.EmptyState
@@ -60,7 +62,6 @@ import com.example.cambiateapp.presentation.components.LoadingState
 import com.example.cambiateapp.presentation.components.PrendaCard
 import com.example.cambiateapp.ui.theme.CambiateAppTheme
 
-/** Capa con estado: conecta el ViewModel con la pantalla. No navega: avisa con callbacks. */
 @Composable
 fun WardrobeListRoute(
     onPrendaClick: (String) -> Unit,
@@ -108,29 +109,40 @@ fun WardrobeListScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Mi armario", style = MaterialTheme.typography.headlineSmall) },
+                title = {
+                    Text(
+                        text = stringResource(R.string.armario_titulo),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 ),
                 actions = {
                     if (state is WardrobeUiState.Contenido) {
                         IconButton(onClick = { foco.requestFocus() }) {
-                            Icon(imageVector = Icons.Rounded.Search, contentDescription = "Buscar")
+                            Icon(
+                                imageVector = Icons.Rounded.Search,
+                                contentDescription = stringResource(R.string.armario_buscar_accion)
+                            )
                         }
                     }
                     IconButton(onClick = { menuAbierto = true }) {
-                        Icon(imageVector = Icons.Rounded.MoreVert, contentDescription = "Más opciones")
+                        Icon(
+                            imageVector = Icons.Rounded.MoreVert,
+                            contentDescription = stringResource(R.string.armario_mas_opciones)
+                        )
                     }
                     DropdownMenu(expanded = menuAbierto, onDismissRequest = { menuAbierto = false }) {
                         DropdownMenuItem(
-                            text = { Text("Ajustes") },
+                            text = { Text(stringResource(R.string.ajustes_titulo)) },
                             onClick = {
                                 menuAbierto = false
                                 onAjustesClick()
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Cerrar sesión") },
+                            text = { Text(stringResource(R.string.menu_cerrar_sesion)) },
                             onClick = {
                                 menuAbierto = false
                                 dialogoAbierto = true
@@ -149,7 +161,10 @@ fun WardrobeListScreen(
                     contentColor = MaterialTheme.colorScheme.onPrimary,
                     elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp)
                 ) {
-                    Icon(imageVector = Icons.Rounded.Add, contentDescription = "Agregar prenda")
+                    Icon(
+                        imageVector = Icons.Rounded.Add,
+                        contentDescription = stringResource(R.string.armario_agregar_prenda)
+                    )
                 }
             }
         }
@@ -158,9 +173,9 @@ fun WardrobeListScreen(
             when (state) {
                 WardrobeUiState.Cargando -> LoadingState()
                 WardrobeUiState.Vacio -> EmptyState(
-                    titulo = "Tu armario está vacío",
-                    mensaje = "Comenzá agregando tus prendas para organizar tu ropa y crear outfits.",
-                    textoBoton = "Agregar mi primera prenda",
+                    titulo = stringResource(R.string.armario_vacio_titulo),
+                    mensaje = stringResource(R.string.armario_vacio_mensaje),
+                    textoBoton = stringResource(R.string.armario_vacio_boton),
                     onClick = onNuevaClick
                 )
                 is WardrobeUiState.Error -> ErrorState(
@@ -178,7 +193,7 @@ fun WardrobeListScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp)
                             .focusRequester(foco),
-                        placeholder = { Text("Buscar prendas") },
+                        placeholder = { Text(stringResource(R.string.armario_buscar_placeholder)) },
                         leadingIcon = {
                             Icon(imageVector = Icons.Rounded.Search, contentDescription = null)
                         },
@@ -190,7 +205,7 @@ fun WardrobeListScreen(
                                 }) {
                                     Icon(
                                         imageVector = Icons.Rounded.Close,
-                                        contentDescription = "Borrar búsqueda"
+                                        contentDescription = stringResource(R.string.armario_borrar_busqueda)
                                     )
                                 }
                             }
@@ -207,14 +222,14 @@ fun WardrobeListScreen(
                     ) {
                         item {
                             CategoryChip(
-                                texto = "Todas",
+                                texto = stringResource(R.string.armario_filtro_todas),
                                 seleccionado = state.filtro == null,
                                 onClick = { onEvent(WardrobeUiEvent.FiltroSeleccionado(null)) }
                             )
                         }
                         items(Categoria.entries) { categoria ->
                             CategoryChip(
-                                texto = categoria.etiqueta(),
+                                texto = stringResource(categoria.etiquetaRes()),
                                 seleccionado = state.filtro == categoria,
                                 onClick = { onEvent(WardrobeUiEvent.FiltroSeleccionado(categoria)) }
                             )
@@ -227,7 +242,7 @@ fun WardrobeListScreen(
                             contentAlignment = Alignment.TopCenter
                         ) {
                             Text(
-                                text = "No encontramos prendas con ese filtro",
+                                text = stringResource(R.string.armario_sin_resultados),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -245,10 +260,10 @@ fun WardrobeListScreen(
                             items(state.prendas, key = { it.id }) { prenda ->
                                 PrendaCard(
                                     nombre = prenda.nombre,
-                                    categoria = prenda.categoria.etiqueta(),
+                                    categoria = stringResource(prenda.categoria.etiquetaRes()),
                                     fotoUrl = prenda.fotoUrl,
                                     onClick = { onPrendaClick(prenda.id) },
-                                    detalle = prenda.detalleCorto(),
+                                    detalle = prenda.detalleCortoLocalizado(),
                                     onEditar = { onEditarClick(prenda.id) }
                                 )
                             }
@@ -262,16 +277,18 @@ fun WardrobeListScreen(
     if (dialogoAbierto) {
         AlertDialog(
             onDismissRequest = { dialogoAbierto = false },
-            title = { Text("Cerrar sesión") },
-            text = { Text("¿Seguro que querés cerrar sesión?") },
+            title = { Text(stringResource(R.string.menu_cerrar_sesion)) },
+            text = { Text(stringResource(R.string.cerrar_sesion_confirmar)) },
             confirmButton = {
                 TextButton(onClick = {
                     dialogoAbierto = false
                     onCerrarSesion()
-                }) { Text("Cerrar sesión") }
+                }) { Text(stringResource(R.string.menu_cerrar_sesion)) }
             },
             dismissButton = {
-                TextButton(onClick = { dialogoAbierto = false }) { Text("Cancelar") }
+                TextButton(onClick = { dialogoAbierto = false }) {
+                    Text(stringResource(R.string.accion_cancelar))
+                }
             }
         )
     }

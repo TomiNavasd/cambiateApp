@@ -37,11 +37,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.example.cambiateapp.R
 import com.example.cambiateapp.domain.model.Categoria
 import com.example.cambiateapp.domain.model.Ocasion
 import com.example.cambiateapp.domain.model.Prenda
@@ -88,12 +90,17 @@ fun PrendaDetailScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Detalle", style = MaterialTheme.typography.headlineSmall) },
+                title = {
+                    Text(
+                        text = stringResource(R.string.detalle_titulo),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onVolver) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = "Volver"
+                            contentDescription = stringResource(R.string.accion_volver)
                         )
                     }
                 }
@@ -104,9 +111,9 @@ fun PrendaDetailScreen(
             when (state) {
                 DetalleUiState.Cargando, DetalleUiState.Eliminada -> LoadingState()
                 DetalleUiState.NoEncontrada -> EmptyState(
-                    titulo = "No encontramos esta prenda",
-                    mensaje = "Puede que se haya eliminado.",
-                    textoBoton = "Volver",
+                    titulo = stringResource(R.string.detalle_no_encontrada_titulo),
+                    mensaje = stringResource(R.string.detalle_no_encontrada_mensaje),
+                    textoBoton = stringResource(R.string.accion_volver),
                     onClick = onVolver
                 )
                 is DetalleUiState.Error -> ErrorState(
@@ -161,19 +168,22 @@ private fun ContenidoDetalle(
                 )
             }
 
-            SeccionEtiquetas(titulo = "Categoría", etiquetas = listOf(prenda.categoria.etiqueta()))
+            SeccionEtiquetas(
+                titulo = stringResource(R.string.detalle_categoria),
+                etiquetas = listOf(stringResource(prenda.categoria.etiquetaRes()))
+            )
 
             if (prenda.colores.isNotEmpty()) {
                 SeccionEtiquetas(
-                    titulo = "Colores",
+                    titulo = stringResource(R.string.detalle_colores),
                     etiquetas = prenda.colores.map { color -> color.replaceFirstChar { it.uppercase() } }
                 )
             }
 
             if (prenda.ocasiones.isNotEmpty()) {
                 SeccionEtiquetas(
-                    titulo = "Ocasiones",
-                    etiquetas = prenda.ocasiones.map { it.etiqueta() }
+                    titulo = stringResource(R.string.detalle_ocasiones),
+                    etiquetas = prenda.ocasiones.map { stringResource(it.etiquetaRes()) }
                 )
             }
         }
@@ -195,7 +205,7 @@ private fun ContenidoDetalle(
                 enabled = !state.eliminando,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Editar prenda")
+                Text(stringResource(R.string.detalle_editar))
             }
 
             OutlinedButton(
@@ -206,7 +216,11 @@ private fun ContenidoDetalle(
                 ),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(if (state.eliminando) "Eliminando..." else "Eliminar prenda")
+                Text(
+                    stringResource(
+                        if (state.eliminando) R.string.detalle_eliminando else R.string.detalle_eliminar
+                    )
+                )
             }
         }
     }
@@ -214,20 +228,23 @@ private fun ContenidoDetalle(
     if (dialogoAbierto) {
         AlertDialog(
             onDismissRequest = { dialogoAbierto = false },
-            title = { Text("¿Eliminar esta prenda?") },
-            text = {
-                Text("Vas a borrar \"${prenda.nombre}\" de tu armario. Esta acción no se puede deshacer.")
-            },
+            title = { Text(stringResource(R.string.detalle_dialogo_titulo)) },
+            text = { Text(stringResource(R.string.detalle_dialogo_texto, prenda.nombre)) },
             confirmButton = {
                 TextButton(onClick = {
                     dialogoAbierto = false
                     onEliminar()
                 }) {
-                    Text("Eliminar", color = MaterialTheme.colorScheme.error)
+                    Text(
+                        text = stringResource(R.string.accion_eliminar),
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
             },
             dismissButton = {
-                TextButton(onClick = { dialogoAbierto = false }) { Text("Cancelar") }
+                TextButton(onClick = { dialogoAbierto = false }) {
+                    Text(stringResource(R.string.accion_cancelar))
+                }
             }
         )
     }

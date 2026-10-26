@@ -15,8 +15,11 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.example.cambiateapp.DeepLinks
 import com.example.cambiateapp.MainActivity
+import com.example.cambiateapp.R
 import com.example.cambiateapp.domain.model.ConsejoClima
 import com.example.cambiateapp.domain.notification.NotificadorConsejo
+import com.example.cambiateapp.ui.text.mensajeLocalizado
+import com.example.cambiateapp.ui.text.tituloLocalizado
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -32,11 +35,12 @@ class AndroidNotificadorConsejo @Inject constructor(
 
         crearCanal()
 
+        val mensaje = consejo.mensajeLocalizado(context)
         val notificacion = NotificationCompat.Builder(context, CANAL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle(consejo.titulo)
-            .setContentText(consejo.mensaje)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(consejo.mensaje))
+            .setContentTitle(consejo.tituloLocalizado(context))
+            .setContentText(mensaje)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(mensaje))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(intentAbrirOutfits())
             .setAutoCancel(true)
@@ -75,12 +79,13 @@ class AndroidNotificadorConsejo @Inject constructor(
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val canal = NotificationChannel(
             CANAL_ID,
-            "Consejos del clima",
+            context.getString(R.string.notif_canal_nombre),
             NotificationManager.IMPORTANCE_DEFAULT,
         ).apply {
-            description = "Qué ponerte según el clima de mañana"
+            description = context.getString(R.string.notif_canal_descripcion)
         }
         val manager = context.getSystemService(NotificationManager::class.java)
+        // Volver a crearlo con el mismo id actualiza el nombre al idioma actual.
         manager.createNotificationChannel(canal)
     }
 

@@ -29,19 +29,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.cambiateapp.R
 import com.example.cambiateapp.presentation.components.AppLogo
 import com.example.cambiateapp.presentation.components.AppTextField
 import com.example.cambiateapp.presentation.components.PasswordTextField
 import com.example.cambiateapp.presentation.components.PrimaryButton
 import com.example.cambiateapp.ui.theme.CambiateAppTheme
 
-/** Capa con estado: conecta el ViewModel y avisa cuando el registro salió bien. */
 @Composable
 fun RegisterRoute(
     onRegistroExitoso: () -> Unit,
@@ -61,7 +62,6 @@ fun RegisterRoute(
     )
 }
 
-/** Pantalla "tonta": solo dibuja el estado y manda eventos hacia arriba. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
@@ -86,12 +86,17 @@ fun RegisterScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Crear cuenta", style = MaterialTheme.typography.titleLarge) },
+                title = {
+                    Text(
+                        text = stringResource(R.string.registro_titulo),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onVolver) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = "Volver"
+                            contentDescription = stringResource(R.string.accion_volver)
                         )
                     }
                 }
@@ -113,7 +118,7 @@ fun RegisterScreen(
             AppTextField(
                 value = state.email,
                 onValueChange = { onEvent(AuthUiEvent.EmailCambio(it)) },
-                label = "Email",
+                label = stringResource(R.string.auth_email),
                 leadingIcon = Icons.Rounded.Email,
                 error = state.emailError,
                 keyboardType = KeyboardType.Email
@@ -122,15 +127,15 @@ fun RegisterScreen(
             PasswordTextField(
                 value = state.password,
                 onValueChange = { onEvent(AuthUiEvent.PasswordCambio(it)) },
-                label = "Contraseña",
+                label = stringResource(R.string.auth_password),
                 error = state.passwordError,
-                ayuda = "Mínimo 6 caracteres"
+                ayuda = stringResource(R.string.registro_password_ayuda)
             )
             Spacer(Modifier.height(8.dp))
             PasswordTextField(
                 value = state.confirmPassword,
                 onValueChange = { onEvent(AuthUiEvent.ConfirmPasswordCambio(it)) },
-                label = "Confirmar contraseña",
+                label = stringResource(R.string.registro_confirmar),
                 error = state.confirmPasswordError,
                 imeAction = ImeAction.Done,
                 keyboardActions = KeyboardActions(onDone = { onEvent(AuthUiEvent.RegistroClick) })
@@ -138,7 +143,7 @@ fun RegisterScreen(
             Spacer(Modifier.height(16.dp))
 
             PrimaryButton(
-                texto = "Crear cuenta",
+                texto = stringResource(R.string.registro_crear),
                 onClick = { onEvent(AuthUiEvent.RegistroClick) },
                 cargando = state.estaCargando
             )
@@ -146,12 +151,15 @@ fun RegisterScreen(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "¿Ya tenés cuenta?",
+                    text = stringResource(R.string.registro_con_cuenta),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 TextButton(onClick = onVolver) {
-                    Text(text = "Iniciá sesión", style = MaterialTheme.typography.labelLarge)
+                    Text(
+                        text = stringResource(R.string.registro_inicia_sesion),
+                        style = MaterialTheme.typography.labelLarge
+                    )
                 }
             }
         }

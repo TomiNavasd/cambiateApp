@@ -1,0 +1,256 @@
+<resources>
+    <string name="sin_conexion_banner">No connection. Your changes will sync when the internet is back.</string>
+
+    <!-- Comunes -->
+    <string name="accion_volver">Back</string>
+
+    <!-- Barra inferior -->
+    <string name="nav_armario">Wardrobe</string>
+    <string name="nav_outfits">Outfits</string>
+    <string name="nav_mapa">Map</string>
+
+    <!-- Ajustes -->
+    <string name="ajustes_titulo">Settings</string>
+    <string name="ajustes_apariencia">Appearance</string>
+    <string name="tema_automatico">Automatic (follows your phone)</string>
+    <string name="tema_claro">Light</string>
+    <string name="tema_oscuro">Dark</string>
+    <string name="ajustes_idioma">Language</string>
+    <string name="idioma_automatico">Automatic (follows your phone)</string>
+    <string name="ajustes_idioma_no_disponible">Changing the language requires Android 13 or later. The app uses your phone\'s language.</string>
+    <string name="ajustes_notificaciones">Notifications</string>
+    <string name="ajustes_recordatorios">Weather reminders</string>
+
+    <!-- Login -->
+    <string name="auth_slogan">Your style, always close</string>
+    <string name="auth_email">Email</string>
+    <string name="auth_password">Password</string>
+    <string name="auth_olvidaste_password">Forgot your password?</string>
+    <string name="auth_iniciar_sesion">Sign in</string>
+    <string name="auth_o">or</string>
+    <string name="auth_continuar_google">Continue with Google</string>
+    <string name="auth_sin_cuenta">Don\'t have an account?</string>
+    <string name="auth_registrate">Sign up</string>
+
+    <!-- Recuperar contraseña -->
+    <string name="recuperar_titulo">Reset password</string>
+    <string name="recuperar_descripcion">Enter your email and we\'ll send you a link to choose a new password.</string>
+    <string name="recuperar_enviar">Send</string>
+    <string name="recuperar_enviando">Sending...</string>
+    <string name="recuperar_cancelar">Cancel</string>
+
+    <!-- Acciones comunes -->
+    <string name="accion_reintentar">Retry</string>
+    <string name="accion_cancelar">Cancel</string>
+    <string name="accion_eliminar">Delete</string>
+
+    <!-- Categorías -->
+    <string name="categoria_superior">Tops</string>
+    <string name="categoria_inferior">Pants</string>
+    <string name="categoria_calzado">Shoes</string>
+    <string name="categoria_abrigo">Jackets</string>
+    <string name="categoria_accesorio">Accessories</string>
+
+    <!-- Ocasiones -->
+    <string name="ocasion_trabajo">Work</string>
+    <string name="ocasion_facultad">College</string>
+    <string name="ocasion_salida">Night out</string>
+    <string name="ocasion_casamiento">Wedding</string>
+    <string name="ocasion_deporte">Sports</string>
+    <string name="ocasion_casual">Casual</string>
+
+    <!-- Temporadas -->
+    <string name="temporada_verano">Summer</string>
+    <string name="temporada_otono">Autumn</string>
+    <string name="temporada_invierno">Winter</string>
+    <string name="temporada_primavera">Spring</string>
+    <string name="temporada_entretiempo">Mid-season</string>
+    <string name="temporada_todo_el_anio">All year</string>
+
+    <!-- Tarjeta de prenda -->
+    <string name="prenda_opciones">Options for %1$s</string>
+    <string name="prenda_ver_detalle">View details</string>
+    <string name="prenda_editar">Edit</string>
+
+    <!-- Detalle de prenda -->
+    <string name="detalle_titulo">Details</string>
+    <string name="detalle_no_encontrada_titulo">We couldn\'t find this item</string>
+    <string name="detalle_no_encontrada_mensaje">It may have been deleted.</string>
+    <string name="detalle_categoria">Category</string>
+    <string name="detalle_colores">Colors</string>
+    <string name="detalle_ocasiones">Occasions</string>
+    <string name="detalle_editar">Edit item</string>
+    <string name="detalle_eliminar">Delete item</string>
+    <string name="detalle_eliminando">Deleting...</string>
+    <string name="detalle_dialogo_titulo">Delete this item?</string>
+    <string name="detalle_dialogo_texto">You are about to remove \"%1$s\" from your wardrobe. This can\'t be undone.</string>
+
+    <!-- Alta y edición de prenda -->
+    <string name="alta_titulo_nueva">New item</string>
+    <string name="alta_titulo_editar">Edit item</string>
+    <string name="alta_nombre">Name</string>
+    <string name="alta_descripcion">Description (optional)</string>
+    <string name="alta_categoria">Category</string>
+    <string name="alta_ocasiones">Occasions</string>
+    <string name="alta_colores">Colors</string>
+    <string name="alta_colores_ayuda">Separated by commas. E.g.: white, blue</string>
+    <string name="alta_guardar">Save item</string>
+    <string name="foto_titulo">Photo</string>
+    <string name="foto_vacia">You haven\'t chosen a photo yet</string>
+    <string name="foto_descripcion">Photo of the item</string>
+    <string name="foto_galeria">Gallery</string>
+    <string name="foto_camara">Camera</string>
+    <string name="foto_analizando">Analyzing item…</string>
+
+    <!-- Registro -->
+    <string name="registro_titulo">Create account</string>
+    <string name="registro_password_ayuda">At least 6 characters</string>
+    <string name="registro_confirmar">Confirm password</string>
+    <string name="registro_crear">Create account</string>
+    <string name="registro_con_cuenta">Already have an account?</string>
+    <string name="registro_inicia_sesion">Sign in</string>
+
+    <!-- Comunes -->
+    <string name="accion_aceptar">OK</string>
+
+    <!-- Armario -->
+    <string name="armario_titulo">My wardrobe</string>
+    <string name="armario_buscar_accion">Search</string>
+    <string name="armario_mas_opciones">More options</string>
+    <string name="menu_cerrar_sesion">Sign out</string>
+    <string name="cerrar_sesion_confirmar">Are you sure you want to sign out?</string>
+    <string name="armario_agregar_prenda">Add item</string>
+    <string name="armario_vacio_titulo">Your wardrobe is empty</string>
+    <string name="armario_vacio_mensaje">Start adding your clothes to organize them and create outfits.</string>
+    <string name="armario_vacio_boton">Add my first item</string>
+    <string name="armario_buscar_placeholder">Search items</string>
+    <string name="armario_borrar_busqueda">Clear search</string>
+    <string name="armario_filtro_todas">All</string>
+    <string name="armario_sin_resultados">We couldn\'t find items with that filter</string>
+
+    <!-- Recordatorios -->
+    <string name="notif_titulo">Reminders</string>
+    <string name="notif_aviso_clima">Weather alert</string>
+    <string name="notif_descripcion">Every day we tell you what to wear based on tomorrow\'s weather.</string>
+    <string name="notif_recibir_diario">Get the daily alert</string>
+    <string name="notif_hora">Alert time</string>
+    <string name="notif_probar">Test now</string>
+
+    <!-- Mapa -->
+    <string name="mapa_titulo">Map</string>
+    <string name="mapa_ubicacion_titulo">We need your location</string>
+    <string name="mapa_permiso_rechazado">Without the permission we can\'t show you on the map. You can enable it in your system settings.</string>
+    <string name="mapa_permiso_pedido">To show you on the map we need location permission.</string>
+    <string name="mapa_dar_permiso">Grant permission</string>
+    <string name="mapa_tu_ubicacion">Your location</string>
+    <string name="mapa_buscando_clima">Looking up the weather…</string>
+    <string name="mapa_sin_clima">We couldn\'t get the weather right now.</string>
+    <string name="mapa_sugerir">Suggest</string>
+    <string name="mapa_manana">Tomorrow · %1$d° / %2$d°</string>
+    <string name="mapa_lluvia">%1$d%% chance of rain</string>
+    <string name="mapa_cache_actualizacion">No connection · Last updated: %1$s</string>
+    <string name="mapa_cache_guardado">No connection · Saved data</string>
+    <string name="mapa_estas_aca">You are here</string>
+
+    <!-- Outfits -->
+    <string name="outfits_titulo">What\'s the occasion?</string>
+    <string name="outfits_eliminar_titulo">Delete outfit?</string>
+    <string name="outfits_eliminar_texto">The outfit is deleted, but your items stay in your wardrobe.</string>
+    <string name="outfits_sugerencias">Suggestions</string>
+    <string name="outfits_guardados">Saved</string>
+    <string name="outfits_sin_guardados">You haven\'t saved any outfits yet. Ask for a suggestion and save the one you like most.</string>
+    <string name="outfits_guardar">Save outfit</string>
+    <string name="outfits_quitar_favorito">Remove from favorites</string>
+    <string name="outfits_marcar_favorito">Mark as favorite</string>
+    <string name="outfits_sugerir">Suggest outfits</string>
+    <string name="outfits_generar_mas">Generate more outfits</string>
+    <string name="outfits_banner_titulo">Outfits suggested from your clothes</string>
+    <string name="outfits_banner_texto">Combinations created from the items in your wardrobe.</string>
+    <string name="outfits_ver_detalles">View details</string>
+    <string name="outfits_descartar">Discard</string>
+    <string name="outfits_eliminar">Delete outfit</string>
+    <string name="outfit_nombre_combinado">%1$s with %2$s</string>
+    <string name="outfit_generico">Outfit</string>
+
+    <!-- Consejo del clima -->
+    <string name="consejo_lluvia_titulo">It will rain tomorrow</string>
+    <string name="consejo_lluvia_con_abrigo">%1$d%% chance of rain: wear your %2$s.</string>
+    <string name="consejo_lluvia_sin_abrigo">%1$d%% chance of rain: bring an umbrella or a waterproof jacket.</string>
+    <string name="consejo_frio_titulo">It will be cold tomorrow</string>
+    <string name="consejo_frio_con_abrigo">The low will be %1$d°: bundle up with your %2$s.</string>
+    <string name="consejo_frio_sin_abrigo">The low will be %1$d°: bundle up.</string>
+    <string name="consejo_calor_titulo">It will be hot tomorrow</string>
+    <string name="consejo_calor_mensaje">The high will be %1$d°: choose light clothes.</string>
+    <string name="consejo_agradable_titulo">Tomorrow, pleasant weather</string>
+    <string name="consejo_agradable_mensaje">You don\'t need special outerwear. Pick the outfit you like best!</string>
+
+    <!-- Canal de notificaciones -->
+    <string name="notif_canal_nombre">Weather tips</string>
+    <string name="notif_canal_descripcion">What to wear based on tomorrow\'s weather</string>
+
+    <!-- Avisos de recordatorios -->
+    <string name="notif_hoy">today</string>
+    <string name="notif_manana">tomorrow</string>
+    <string name="notif_aviso_probar_ok">Done, check the notification bar</string>
+    <string name="notif_aviso_sin_permiso_notif">There is no permission to show notifications</string>
+    <string name="notif_aviso_permiso_rechazado">Without permission we can\'t alert you. Enable it in your system settings.</string>
+    <string name="notif_aviso_ubicacion_rechazada">Without your location we can\'t know the weather in your area. Enable it in your system settings.</string>
+    <string name="notif_aviso_desactivado">Reminder turned off</string>
+    <string name="notif_aviso_error_guardar">We couldn\'t save the reminder</string>
+    <string name="notif_aviso_activado">Reminder on: we\'ll alert you %1$s at %2$02d:%3$02d and then every day. It is now %4$02d:%5$02d on this device.</string>
+
+    <!-- Errores de ubicación -->
+    <string name="error_ubicacion">We couldn\'t get your location.</string>
+    <string name="error_ubicacion_gps">We couldn\'t get your location. Check that GPS is on.</string>
+
+    <string name="consejo_prueba_titulo">It will rain tomorrow (test)</string>
+    <string name="consejo_prueba_mensaje">This is how your weather alert will look. Tap to see your outfits.</string>
+
+    <!-- Errores comunes -->
+    <string name="error_sin_conexion">No connection. Check your internet and try again</string>
+    <string name="error_inesperado">An unexpected error occurred. Try again</string>
+    <string name="error_revisar_datos">Check the data you entered</string>
+    <string name="error_sesion_vencida">Your session expired. Sign in again</string>
+
+    <!-- Errores de login y registro -->
+    <string name="auth_error_pass_no_coinciden">Passwords don\'t match</string>
+    <string name="auth_error_email_invalido">Enter a valid email</string>
+    <string name="auth_error_pass_debil">The password must be at least 6 characters long</string>
+    <string name="auth_error_email_registrado">That email is already registered</string>
+    <string name="auth_error_pass_vacia">Enter your password</string>
+    <string name="auth_error_credenciales">Incorrect email or password</string>
+    <string name="recuperar_ok">If the email is registered, we sent you a link to choose a new password</string>
+    <string name="recuperar_error_envio">We couldn\'t send the email. Try again</string>
+    <string name="google_error_generico">We couldn\'t sign you in with Google. Try again</string>
+    <string name="google_error_email_otro_metodo">That email is already registered with another sign-in method</string>
+    <string name="google_error_sin_cuenta">We couldn\'t find a Google account on this phone</string>
+
+    <!-- Alta y edición de prenda -->
+    <string name="alta_error_nombre">Enter a name</string>
+    <string name="alta_error_foto">Choose a photo for the item</string>
+    <string name="alta_error_subir_foto">We couldn\'t upload the photo. Try again</string>
+    <string name="alta_error_foto_sin_internet">The new photo needs internet to upload. Connect and tap Save again: the data you typed isn\'t lost.</string>
+    <string name="alta_error_guardar">We couldn\'t save the item</string>
+    <string name="alta_error_cargar">We couldn\'t load the item</string>
+    <string name="alta_error_sin_permiso">You don\'t have permission to modify this item</string>
+    <string name="escaneo_ok">We filled in the details with AI. Review them and fix whatever is needed.</string>
+    <string name="escaneo_fallo">We couldn\'t analyze the photo. Fill in the details by hand.</string>
+    <string name="escaneo_sin_internet">No connection: the new photo needs internet to be analyzed and uploaded. You can fill in the details by hand and save when the connection is back.</string>
+
+    <!-- Armario y detalle -->
+    <string name="armario_error_sin_permiso">You don\'t have permission to view these items</string>
+    <string name="armario_error_cargar">We couldn\'t load your wardrobe</string>
+    <string name="detalle_error_sin_permiso">You don\'t have permission to view this item</string>
+    <string name="detalle_error_eliminar_sin_conexion">No connection. We couldn\'t delete the item</string>
+    <string name="detalle_error_eliminar_sin_permiso">You don\'t have permission to delete this item</string>
+    <string name="detalle_error_eliminar">We couldn\'t delete the item</string>
+
+    <!-- Ajustes -->
+    <string name="ajustes_error_tema">We couldn\'t save the theme</string>
+
+    <!-- Avisos de outfits -->
+    <string name="outfits_aviso_sin_sugerencias">There aren\'t enough items for that occasion: you need at least one top, one bottom and one pair of shoes marked for it.</string>
+    <string name="outfits_aviso_ya_guardado">That outfit is already saved</string>
+    <string name="outfits_aviso_guardado">Outfit saved</string>
+    <string name="outfits_error_permisos">You don\'t have permission for this action.</string>
+</resources>

@@ -3,7 +3,9 @@ package com.example.cambiateapp.presentation.notifications
 import com.example.cambiateapp.AgendadorFake
 import com.example.cambiateapp.MainDispatcherRule
 import com.example.cambiateapp.NotificadorFake
+import com.example.cambiateapp.R
 import com.example.cambiateapp.RecordatorioRepositoryFake
+import com.example.cambiateapp.TextosFake
 import com.example.cambiateapp.UbicacionRepositoryFake
 import com.example.cambiateapp.domain.usecase.ConfigurarRecordatorioUseCase
 import com.example.cambiateapp.domain.usecase.EnviarNotificacionDePruebaUseCase
@@ -33,12 +35,14 @@ class NotificacionesViewModelTest {
     private val agendador = AgendadorFake()
     private val notificador = NotificadorFake()
     private val ubicacionRepositorio = UbicacionRepositoryFake()
+    private val textos = TextosFake()
 
     private fun crearViewModel() = NotificacionesViewModel(
         observarPreferencias = ObservarPreferenciasRecordatorioUseCase(repositorio),
         configurarRecordatorio = ConfigurarRecordatorioUseCase(repositorio, agendador),
         enviarNotificacionDePrueba = EnviarNotificacionDePruebaUseCase(notificador),
         obtenerUbicacion = ObtenerUbicacionUseCase(ubicacionRepositorio),
+        textos = textos,
     )
 
     /** El estado solo se calcula si alguien lo está mirando: este "observador" hace de pantalla. */
@@ -71,7 +75,8 @@ class NotificacionesViewModelTest {
 
         assertTrue(vm.uiState.value.activo)
         assertEquals(20 to 0, agendador.programado)
-        assertTrue(vm.uiState.value.aviso!!.contains("activado"))
+        // Este aviso lleva datos (cuándo suena y la hora actual), por eso se comprueba solo qué texto es.
+        assertTrue(vm.uiState.value.aviso!!.startsWith("#${R.string.notif_aviso_activado}:"))
     }
 
     @Test
@@ -86,7 +91,7 @@ class NotificacionesViewModelTest {
 
         assertFalse(vm.uiState.value.activo)
         assertEquals(1, agendador.cancelaciones)
-        assertTrue(vm.uiState.value.aviso!!.contains("desactivado"))
+        assertEquals(textos.obtener(R.string.notif_aviso_desactivado), vm.uiState.value.aviso)
     }
 
     @Test
@@ -113,7 +118,7 @@ class NotificacionesViewModelTest {
         advanceUntilIdle()
 
         assertNotNull(notificador.ultimoConsejo)
-        assertTrue(vm.uiState.value.aviso!!.contains("barra de notificaciones"))
+        assertEquals(textos.obtener(R.string.notif_aviso_probar_ok), vm.uiState.value.aviso)
     }
 
     @Test
@@ -126,7 +131,7 @@ class NotificacionesViewModelTest {
         advanceUntilIdle()
 
         assertNull(notificador.ultimoConsejo)
-        assertTrue(vm.uiState.value.aviso!!.contains("No hay permiso"))
+        assertEquals(textos.obtener(R.string.notif_aviso_sin_permiso_notif), vm.uiState.value.aviso)
     }
 
     @Test
@@ -137,7 +142,7 @@ class NotificacionesViewModelTest {
         vm.onEvent(NotificacionesUiEvent.PermisoRechazado)
         advanceUntilIdle()
 
-        assertTrue(vm.uiState.value.aviso!!.contains("Sin permiso"))
+        assertEquals(textos.obtener(R.string.notif_aviso_permiso_rechazado), vm.uiState.value.aviso)
     }
 
     @Test
@@ -174,7 +179,7 @@ class NotificacionesViewModelTest {
         vm.onEvent(NotificacionesUiEvent.UbicacionConcedida)
         advanceUntilIdle()
 
-        assertTrue(vm.uiState.value.aviso!!.contains("GPS"))
+        assertEquals(textos.obtener(R.string.error_ubicacion_gps), vm.uiState.value.aviso)
     }
 
     @Test
@@ -186,7 +191,7 @@ class NotificacionesViewModelTest {
         vm.onEvent(NotificacionesUiEvent.UbicacionConcedida)
         advanceUntilIdle()
 
-        assertEquals("No pudimos obtener tu ubicación.", vm.uiState.value.aviso)
+        assertEquals(textos.obtener(R.string.error_ubicacion), vm.uiState.value.aviso)
     }
 
     @Test
@@ -197,7 +202,7 @@ class NotificacionesViewModelTest {
         vm.onEvent(NotificacionesUiEvent.UbicacionRechazada)
         advanceUntilIdle()
 
-        assertTrue(vm.uiState.value.aviso!!.contains("Sin tu ubicación"))
+        assertEquals(textos.obtener(R.string.notif_aviso_ubicacion_rechazada), vm.uiState.value.aviso)
         assertEquals(0, ubicacionRepositorio.consultas)
     }
 }

@@ -4,6 +4,7 @@ import com.example.cambiateapp.domain.model.Categoria
 import com.example.cambiateapp.domain.model.ConsejoClima
 import com.example.cambiateapp.domain.model.Pronostico
 import com.example.cambiateapp.domain.model.Prenda
+import com.example.cambiateapp.domain.model.TipoConsejo
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
@@ -24,6 +25,7 @@ class ArmarConsejoClimaUseCase @Inject constructor() {
                         "Hay ${pronostico.probLluviaPct}% de lluvia: llevá paraguas o una campera impermeable."
                     },
                     prendasSugeridas = listOfNotNull(abrigo),
+                    tipo = TipoConsejo.Lluvia(pronostico.probLluviaPct, abrigo?.nombre),
                 )
             }
             pronostico.tempMinC < UMBRAL_FRIO_C -> {
@@ -36,17 +38,20 @@ class ArmarConsejoClimaUseCase @Inject constructor() {
                         "La mínima será de ${pronostico.tempMinC.roundToInt()}°: abrigate bien."
                     },
                     prendasSugeridas = listOfNotNull(abrigo),
+                    tipo = TipoConsejo.Frio(pronostico.tempMinC.roundToInt(), abrigo?.nombre),
                 )
             }
             pronostico.tempMaxC >= UMBRAL_CALOR_C -> ConsejoClima(
                 titulo = "Mañana hace calor",
                 mensaje = "La máxima será de ${pronostico.tempMaxC.roundToInt()}°: elegí ropa liviana.",
                 prendasSugeridas = emptyList(),
+                tipo = TipoConsejo.Calor(pronostico.tempMaxC.roundToInt()),
             )
             else -> ConsejoClima(
                 titulo = "Mañana, clima agradable",
                 mensaje = "No necesitás abrigo especial. ¡Elegí el outfit que más te guste!",
                 prendasSugeridas = emptyList(),
+                tipo = TipoConsejo.Agradable,
             )
         }
     }

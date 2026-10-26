@@ -1,4 +1,263 @@
 <resources>
     <string name="app_name">CambiateApp</string>
     <string name="sin_conexion_banner">Sin conexión. Tus cambios se sincronizan cuando vuelva internet.</string>
+
+    <!-- Comunes -->
+    <string name="accion_volver">Volver</string>
+
+
+    <!-- Barra inferior -->
+    <string name="nav_armario">Armario</string>
+    <string name="nav_outfits">Outfits</string>
+    <string name="nav_mapa">Mapa</string>
+
+    <!-- Ajustes -->
+    <string name="ajustes_titulo">Ajustes</string>
+    <string name="ajustes_apariencia">Apariencia</string>
+    <string name="tema_automatico">Automático (según el celular)</string>
+    <string name="tema_claro">Claro</string>
+    <string name="tema_oscuro">Oscuro</string>
+    <string name="ajustes_idioma">Idioma</string>
+    <string name="idioma_automatico">Automático (según el celular)</string>
+    <string name="idioma_espanol" translatable="false">Español</string>
+    <string name="idioma_ingles" translatable="false">English</string>
+    <string name="idioma_portugues" translatable="false">Português</string>
+    <string name="ajustes_idioma_no_disponible">Cambiar el idioma requiere Android 13 o superior. La app usa el idioma del celular.</string>
+    <string name="ajustes_notificaciones">Notificaciones</string>
+    <string name="ajustes_recordatorios">Recordatorios del clima</string>
+
+    <!-- Login -->
+    <string name="auth_slogan">Tu estilo, siempre cerca</string>
+    <string name="auth_email">Email</string>
+    <string name="auth_password">Contraseña</string>
+    <string name="auth_olvidaste_password">¿Olvidaste tu contraseña?</string>
+    <string name="auth_iniciar_sesion">Iniciar sesión</string>
+    <string name="auth_o">o</string>
+    <string name="auth_continuar_google">Continuar con Google</string>
+    <string name="auth_sin_cuenta">¿No tenés una cuenta?</string>
+    <string name="auth_registrate">Registrate</string>
+
+    <!-- Recuperar contraseña -->
+    <string name="recuperar_titulo">Recuperar contraseña</string>
+    <string name="recuperar_descripcion">Ingresá tu email y te mandamos un link para elegir una contraseña nueva.</string>
+    <string name="recuperar_enviar">Enviar</string>
+    <string name="recuperar_enviando">Enviando...</string>
+    <string name="recuperar_cancelar">Cancelar</string>
+
+    <!-- Acciones comunes -->
+    <string name="accion_reintentar">Reintentar</string>
+    <string name="accion_cancelar">Cancelar</string>
+    <string name="accion_eliminar">Eliminar</string>
+
+    <!-- Categorías -->
+    <string name="categoria_superior">Tops</string>
+    <string name="categoria_inferior">Pantalones</string>
+    <string name="categoria_calzado">Calzado</string>
+    <string name="categoria_abrigo">Camperas</string>
+    <string name="categoria_accesorio">Accesorios</string>
+
+    <!-- Ocasiones -->
+    <string name="ocasion_trabajo">Trabajo</string>
+    <string name="ocasion_facultad">Facultad</string>
+    <string name="ocasion_salida">Salida</string>
+    <string name="ocasion_casamiento">Casamiento</string>
+    <string name="ocasion_deporte">Deporte</string>
+    <string name="ocasion_casual">Casual</string>
+
+    <!-- Temporadas -->
+    <string name="temporada_verano">Verano</string>
+    <string name="temporada_otono">Otoño</string>
+    <string name="temporada_invierno">Invierno</string>
+    <string name="temporada_primavera">Primavera</string>
+    <string name="temporada_entretiempo">Entretiempo</string>
+    <string name="temporada_todo_el_anio">Todo el año</string>
+
+    <!-- Tarjeta de prenda -->
+    <string name="prenda_opciones">Opciones de %1$s</string>
+    <string name="prenda_ver_detalle">Ver detalle</string>
+    <string name="prenda_editar">Editar</string>
+
+    <!-- Detalle de prenda -->
+    <string name="detalle_titulo">Detalle</string>
+    <string name="detalle_no_encontrada_titulo">No encontramos esta prenda</string>
+    <string name="detalle_no_encontrada_mensaje">Puede que se haya eliminado.</string>
+    <string name="detalle_categoria">Categoría</string>
+    <string name="detalle_colores">Colores</string>
+    <string name="detalle_ocasiones">Ocasiones</string>
+    <string name="detalle_editar">Editar prenda</string>
+    <string name="detalle_eliminar">Eliminar prenda</string>
+    <string name="detalle_eliminando">Eliminando...</string>
+    <string name="detalle_dialogo_titulo">¿Eliminar esta prenda?</string>
+    <string name="detalle_dialogo_texto">Vas a borrar \"%1$s\" de tu armario. Esta acción no se puede deshacer.</string>
+
+    <!-- Alta y edición de prenda -->
+    <string name="alta_titulo_nueva">Nueva prenda</string>
+    <string name="alta_titulo_editar">Editar prenda</string>
+    <string name="alta_nombre">Nombre</string>
+    <string name="alta_descripcion">Descripción (opcional)</string>
+    <string name="alta_categoria">Categoría</string>
+    <string name="alta_ocasiones">Ocasiones</string>
+    <string name="alta_colores">Colores</string>
+    <string name="alta_colores_ayuda">Separados por coma. Ej: blanco, azul</string>
+    <string name="alta_guardar">Guardar prenda</string>
+    <string name="foto_titulo">Foto</string>
+    <string name="foto_vacia">Todavía no elegiste una foto</string>
+    <string name="foto_descripcion">Foto de la prenda</string>
+    <string name="foto_galeria">Galería</string>
+    <string name="foto_camara">Cámara</string>
+    <string name="foto_analizando">Analizando prenda…</string>
+
+    <!-- Registro -->
+    <string name="registro_titulo">Crear cuenta</string>
+    <string name="registro_password_ayuda">Mínimo 6 caracteres</string>
+    <string name="registro_confirmar">Confirmar contraseña</string>
+    <string name="registro_crear">Crear cuenta</string>
+    <string name="registro_con_cuenta">¿Ya tenés cuenta?</string>
+    <string name="registro_inicia_sesion">Iniciá sesión</string>
+
+    <!-- Comunes -->
+    <string name="accion_aceptar">Aceptar</string>
+
+    <!-- Armario -->
+    <string name="armario_titulo">Mi armario</string>
+    <string name="armario_buscar_accion">Buscar</string>
+    <string name="armario_mas_opciones">Más opciones</string>
+    <string name="menu_cerrar_sesion">Cerrar sesión</string>
+    <string name="cerrar_sesion_confirmar">¿Seguro que querés cerrar sesión?</string>
+    <string name="armario_agregar_prenda">Agregar prenda</string>
+    <string name="armario_vacio_titulo">Tu armario está vacío</string>
+    <string name="armario_vacio_mensaje">Comenzá agregando tus prendas para organizar tu ropa y crear outfits.</string>
+    <string name="armario_vacio_boton">Agregar mi primera prenda</string>
+    <string name="armario_buscar_placeholder">Buscar prendas</string>
+    <string name="armario_borrar_busqueda">Borrar búsqueda</string>
+    <string name="armario_filtro_todas">Todas</string>
+    <string name="armario_sin_resultados">No encontramos prendas con ese filtro</string>
+
+    <!-- Recordatorios -->
+    <string name="notif_titulo">Recordatorios</string>
+    <string name="notif_aviso_clima">Aviso del clima</string>
+    <string name="notif_descripcion">Te avisamos todos los días qué ponerte según el clima de mañana.</string>
+    <string name="notif_recibir_diario">Recibir el aviso diario</string>
+    <string name="notif_hora">Hora del aviso</string>
+    <string name="notif_probar">Probar ahora</string>
+
+    <!-- Mapa -->
+    <string name="mapa_titulo">Mapa</string>
+    <string name="mapa_ubicacion_titulo">Necesitamos tu ubicación</string>
+    <string name="mapa_permiso_rechazado">Sin el permiso no podemos mostrarte en el mapa. Podés activarlo desde los ajustes del sistema.</string>
+    <string name="mapa_permiso_pedido">Para mostrarte en el mapa necesitamos permiso de ubicación.</string>
+    <string name="mapa_dar_permiso">Dar permiso</string>
+    <string name="mapa_tu_ubicacion">Tu ubicación</string>
+    <string name="mapa_buscando_clima">Buscando el clima…</string>
+    <string name="mapa_sin_clima">No pudimos obtener el clima por ahora.</string>
+    <string name="mapa_sugerir">Sugerir</string>
+    <string name="mapa_manana">Mañana · %1$d° / %2$d°</string>
+    <string name="mapa_lluvia">%1$d%% de probabilidad de lluvia</string>
+    <string name="mapa_cache_actualizacion">Sin conexión · Última actualización: %1$s</string>
+    <string name="mapa_cache_guardado">Sin conexión · Datos guardados</string>
+    <string name="mapa_estas_aca">Estás acá</string>
+
+    <!-- Outfits -->
+    <string name="outfits_titulo">¿Para qué ocasión?</string>
+    <string name="outfits_eliminar_titulo">¿Eliminar outfit?</string>
+    <string name="outfits_eliminar_texto">Se borra el outfit, pero tus prendas se mantienen en el armario.</string>
+    <string name="outfits_sugerencias">Sugerencias</string>
+    <string name="outfits_guardados">Guardados</string>
+    <string name="outfits_sin_guardados">Todavía no guardaste outfits. Pedí una sugerencia y guardá la que más te guste.</string>
+    <string name="outfits_guardar">Guardar outfit</string>
+    <string name="outfits_quitar_favorito">Quitar de favoritos</string>
+    <string name="outfits_marcar_favorito">Marcar como favorito</string>
+    <string name="outfits_sugerir">Sugerirme outfits</string>
+    <string name="outfits_generar_mas">Generar más outfits</string>
+    <string name="outfits_banner_titulo">Outfits sugeridos con tu ropa</string>
+    <string name="outfits_banner_texto">Combinaciones creadas con las prendas de tu armario.</string>
+    <string name="outfits_ver_detalles">Ver detalles</string>
+    <string name="outfits_descartar">Descartar</string>
+    <string name="outfits_eliminar">Eliminar outfit</string>
+    <string name="outfit_nombre_combinado">%1$s con %2$s</string>
+    <string name="outfit_generico">Outfit</string>
+
+    <!-- Consejo del clima -->
+    <string name="consejo_lluvia_titulo">Mañana llueve</string>
+    <string name="consejo_lluvia_con_abrigo">Hay %1$d%% de lluvia: usá tu %2$s.</string>
+    <string name="consejo_lluvia_sin_abrigo">Hay %1$d%% de lluvia: llevá paraguas o una campera impermeable.</string>
+    <string name="consejo_frio_titulo">Mañana hace frío</string>
+    <string name="consejo_frio_con_abrigo">La mínima será de %1$d°: abrigate con tu %2$s.</string>
+    <string name="consejo_frio_sin_abrigo">La mínima será de %1$d°: abrigate bien.</string>
+    <string name="consejo_calor_titulo">Mañana hace calor</string>
+    <string name="consejo_calor_mensaje">La máxima será de %1$d°: elegí ropa liviana.</string>
+    <string name="consejo_agradable_titulo">Mañana, clima agradable</string>
+    <string name="consejo_agradable_mensaje">No necesitás abrigo especial. ¡Elegí el outfit que más te guste!</string>
+
+    <!-- Canal de notificaciones -->
+    <string name="notif_canal_nombre">Consejos del clima</string>
+    <string name="notif_canal_descripcion">Qué ponerte según el clima de mañana</string>
+
+    <!-- Avisos de recordatorios -->
+    <string name="notif_hoy">hoy</string>
+    <string name="notif_manana">mañana</string>
+    <string name="notif_aviso_probar_ok">Listo, mirá la barra de notificaciones</string>
+    <string name="notif_aviso_sin_permiso_notif">No hay permiso para mostrar notificaciones</string>
+    <string name="notif_aviso_permiso_rechazado">Sin permiso no podemos avisarte. Activalo en los ajustes del sistema.</string>
+    <string name="notif_aviso_ubicacion_rechazada">Sin tu ubicación no podemos saber el clima de tu zona. Activala en los ajustes del sistema.</string>
+    <string name="notif_aviso_desactivado">Recordatorio desactivado</string>
+    <string name="notif_aviso_error_guardar">No pudimos guardar el recordatorio</string>
+    <string name="notif_aviso_activado">Recordatorio activado: te avisamos %1$s a las %2$02d:%3$02d y después todos los días. Ahora son %4$02d:%5$02d en este dispositivo.</string>
+
+    <!-- Errores de ubicación -->
+    <string name="error_ubicacion">No pudimos obtener tu ubicación.</string>
+    <string name="error_ubicacion_gps">No pudimos obtener tu ubicación. Revisá que el GPS esté activado.</string>
+
+    <string name="consejo_prueba_titulo">Mañana llueve (prueba)</string>
+    <string name="consejo_prueba_mensaje">Así se va a ver tu aviso del clima. Tocá para ver tus outfits.</string>
+
+    <!-- Errores comunes -->
+    <string name="error_sin_conexion">Sin conexión. Revisá tu internet e intentá de nuevo</string>
+    <string name="error_inesperado">Ocurrió un error inesperado. Intentá de nuevo</string>
+    <string name="error_revisar_datos">Revisá los datos ingresados</string>
+    <string name="error_sesion_vencida">Tu sesión venció. Iniciá sesión de nuevo</string>
+
+    <!-- Errores de login y registro -->
+    <string name="auth_error_pass_no_coinciden">Las contraseñas no coinciden</string>
+    <string name="auth_error_email_invalido">Ingresá un email válido</string>
+    <string name="auth_error_pass_debil">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="auth_error_email_registrado">Ese email ya está registrado</string>
+    <string name="auth_error_pass_vacia">Ingresá tu contraseña</string>
+    <string name="auth_error_credenciales">Email o contraseña incorrectos</string>
+    <string name="recuperar_ok">Si el mail está registrado, te enviamos un link para elegir una contraseña nueva</string>
+    <string name="recuperar_error_envio">No pudimos enviar el mail. Intentá de nuevo</string>
+    <string name="google_error_generico">No pudimos iniciar sesión con Google. Intentá de nuevo</string>
+    <string name="google_error_email_otro_metodo">Ese email ya está registrado con otro método de acceso</string>
+    <string name="google_error_sin_cuenta">No encontramos una cuenta de Google en este celular</string>
+
+    <!-- Alta y edición de prenda -->
+    <string name="alta_error_nombre">Ingresá un nombre</string>
+    <string name="alta_error_foto">Elegí una foto para la prenda</string>
+    <string name="alta_error_subir_foto">No pudimos subir la foto. Intentá de nuevo</string>
+    <string name="alta_error_foto_sin_internet">La foto nueva necesita internet para subirse. Conectate y volvé a tocar Guardar: los datos que escribiste no se pierden.</string>
+    <string name="alta_error_guardar">No pudimos guardar la prenda</string>
+    <string name="alta_error_cargar">No pudimos cargar la prenda</string>
+    <string name="alta_error_sin_permiso">No tenés permiso para modificar esta prenda</string>
+    <string name="escaneo_ok">Completamos los datos con IA. Revisalos y corregí lo que haga falta.</string>
+    <string name="escaneo_fallo">No pudimos analizar la foto. Completá los datos a mano.</string>
+    <string name="escaneo_sin_internet">Sin conexión: la foto nueva necesita internet para analizarse y subirse. Podés completar los datos a mano y guardar cuando vuelva la conexión.</string>
+
+    <!-- Armario y detalle -->
+    <string name="armario_error_sin_permiso">No tenés permiso para ver estas prendas</string>
+    <string name="armario_error_cargar">No pudimos cargar tu armario</string>
+    <string name="detalle_error_sin_permiso">No tenés permiso para ver esta prenda</string>
+    <string name="detalle_error_eliminar_sin_conexion">Sin conexión. No pudimos eliminar la prenda</string>
+    <string name="detalle_error_eliminar_sin_permiso">No tenés permiso para eliminar esta prenda</string>
+    <string name="detalle_error_eliminar">No pudimos eliminar la prenda</string>
+
+    <!-- Ajustes -->
+    <string name="ajustes_error_tema">No pudimos guardar el tema</string>
+
+    <!-- Avisos de outfits -->
+    <string name="outfits_aviso_sin_sugerencias">No hay prendas suficientes para esa ocasión: necesitás al menos una superior, una inferior y un calzado marcados para ella.</string>
+    <string name="outfits_aviso_ya_guardado">Ese outfit ya está guardado</string>
+    <string name="outfits_aviso_guardado">Outfit guardado</string>
+    <string name="outfits_error_permisos">No tenés permisos para esta acción.</string>
+
+
 </resources>

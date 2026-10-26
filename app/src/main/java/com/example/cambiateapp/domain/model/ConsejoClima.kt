@@ -4,4 +4,5 @@ data class ConsejoClima(
     val titulo: String,
     val mensaje: String,
     val prendasSugeridas: List<Prenda>,
+    val tipo: TipoConsejo? = null,
 )

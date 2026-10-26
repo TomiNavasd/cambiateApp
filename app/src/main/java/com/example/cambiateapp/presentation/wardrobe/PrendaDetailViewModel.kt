@@ -3,10 +3,12 @@ package com.example.cambiateapp.presentation.wardrobe
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cambiateapp.R
 import com.example.cambiateapp.domain.error.DomainException
 import com.example.cambiateapp.domain.model.Prenda
 import com.example.cambiateapp.domain.usecase.DeletePrendaUseCase
 import com.example.cambiateapp.domain.usecase.ObservePrendasUseCase
+import com.example.cambiateapp.presentation.common.ProveedorDeTextos
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,17 +28,16 @@ import kotlinx.coroutines.launch
 class PrendaDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val observePrendas: ObservePrendasUseCase,
-    private val deletePrenda: DeletePrendaUseCase
+    private val deletePrenda: DeletePrendaUseCase,
+    private val textos: ProveedorDeTextos
 ) : ViewModel() {
 
-    // Cómo va el borrado: en curso, con error o completado.
     private data class Eliminacion(
         val enCurso: Boolean = false,
         val error: String? = null,
         val completada: Boolean = false
     )
 
-    // El id llega como argumento de la ruta "detalle/{id}".
     private val prendaId: String = savedStateHandle.get<String>(Ruta.Detalle.ARG_ID).orEmpty()
     private val reintentos = MutableStateFlow(0)
     private val eliminacion = MutableStateFlow(Eliminacion())
@@ -75,7 +76,6 @@ class PrendaDetailViewModel @Inject constructor(
 
     private fun armarEstado(prendas: List<Prenda>, elim: Eliminacion): DetalleUiState {
         val prenda = prendas.firstOrNull { it.id == prendaId }
-        // Si la prenda desapareció mientras la estábamos borrando, no es "no encontrada": se borró.
         if (elim.completada || (elim.enCurso && prenda == null)) return DetalleUiState.Eliminada
         if (prenda == null) return DetalleUiState.NoEncontrada
         return DetalleUiState.Contenido(
@@ -85,16 +85,20 @@ class PrendaDetailViewModel @Inject constructor(
         )
     }
 
-    private fun mensajeDe(error: Throwable): String = when (error) {
-        DomainException.SinConexion -> "Sin conexión. Revisá tu internet e intentá de nuevo"
-        DomainException.SinPermisos -> "No tenés permiso para ver esta prenda"
-        else -> "No pudimos cargar la prenda"
-    }
+    private fun mensajeDe(error: Throwable): String = textos.obtener(
+        when (error) {
+            DomainException.SinConexion -> R.string.error_sin_conexion
+            DomainException.SinPermisos -> R.string.detalle_error_sin_permiso
+            else -> R.string.alta_error_cargar
+        }
+    )
 
-    private fun mensajeEliminarDe(error: Throwable): String = when (error) {
-        DomainException.SinConexion -> "Sin conexión. No pudimos eliminar la prenda"
-        DomainException.SinPermisos -> "No tenés permiso para eliminar esta prenda"
-        DomainException.SesionNoIniciada -> "Tu sesión venció. Iniciá sesión de nuevo"
-        else -> "No pudimos eliminar la prenda"
-    }
+    private fun mensajeEliminarDe(error: Throwable): String = textos.obtener(
+        when (error) {
+            DomainException.SinConexion -> R.string.detalle_error_eliminar_sin_conexion
+            DomainException.SinPermisos -> R.string.detalle_error_eliminar_sin_permiso
+            DomainException.SesionNoIniciada -> R.string.error_sesion_vencida
+            else -> R.string.detalle_error_eliminar
+        }
+    )
 }

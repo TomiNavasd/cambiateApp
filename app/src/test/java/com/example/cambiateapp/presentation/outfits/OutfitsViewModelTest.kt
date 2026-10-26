@@ -1,6 +1,8 @@
 package com.example.cambiateapp.presentation.outfits
 
 import com.example.cambiateapp.MainDispatcherRule
+import com.example.cambiateapp.R
+import com.example.cambiateapp.TextosFake
 import com.example.cambiateapp.domain.error.DomainException
 import com.example.cambiateapp.domain.model.Categoria
 import com.example.cambiateapp.domain.model.Ocasion
@@ -35,6 +37,8 @@ class OutfitsViewModelTest {
 
     @get:Rule
     val mainRule = MainDispatcherRule()
+
+    private val textos = TextosFake()
 
     // ---- Versiones falsas (en memoria) ----
 
@@ -100,11 +104,11 @@ class OutfitsViewModelTest {
             observePrendas = observarPrendas,
             saveOutfit = SaveOutfitUseCase(repoOutfits),
             deleteOutfit = DeleteOutfitUseCase(repoOutfits),
-            suggestOutfits = SuggestOutfitsUseCase(observarPrendas, sugeridor)
+            suggestOutfits = SuggestOutfitsUseCase(observarPrendas, sugeridor),
+            textos = textos
         )
     }
 
-    /** El estado solo se calcula mientras alguien lo observa: abrimos un colector de fondo. */
     private fun TestScope.observar(vm: OutfitsViewModel) {
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { vm.uiState.collect {} }
     }
@@ -147,7 +151,7 @@ class OutfitsViewModelTest {
 
         val estado = vm.contenido()
         assertTrue(estado.sugerencias.isEmpty())
-        assertTrue(estado.aviso!!.contains("No hay prendas suficientes"))
+        assertEquals(textos.obtener(R.string.outfits_aviso_sin_sugerencias), estado.aviso)
     }
 
     @Test
@@ -158,7 +162,7 @@ class OutfitsViewModelTest {
         vm.onEvent(OutfitsUiEvent.Sugerir)
 
         val estado = vm.contenido()
-        assertTrue(estado.aviso!!.startsWith("Sin conexión"))
+        assertEquals(textos.obtener(R.string.error_sin_conexion), estado.aviso)
         assertEquals(false, estado.sugiriendo)
     }
 
@@ -191,7 +195,7 @@ class OutfitsViewModelTest {
         assertEquals(1, repo.guardados.size)
         assertTrue(estado.sugerencias.isEmpty())
         assertEquals(1, estado.guardados.size)
-        assertEquals("Outfit guardado", estado.aviso)
+        assertEquals(textos.obtener(R.string.outfits_aviso_guardado), estado.aviso)
     }
 
     @Test
@@ -209,7 +213,7 @@ class OutfitsViewModelTest {
         val estado = vm.contenido()
         assertTrue(repo.guardados.isEmpty())
         assertTrue(estado.sugerencias.isEmpty())
-        assertEquals("Ese outfit ya está guardado", estado.aviso)
+        assertEquals(textos.obtener(R.string.outfits_aviso_ya_guardado), estado.aviso)
     }
 
     @Test
@@ -278,7 +282,7 @@ class OutfitsViewModelTest {
         vm.onEvent(OutfitsUiEvent.GuardarSugerencia(0))
 
         val estado = vm.contenido()
-        assertTrue(estado.aviso!!.startsWith("Sin conexión"))
+        assertEquals(textos.obtener(R.string.error_sin_conexion), estado.aviso)
         assertEquals(1, estado.sugerencias.size)
     }
 
@@ -290,6 +294,9 @@ class OutfitsViewModelTest {
         val estado = vm.uiState.value
 
         assertTrue(estado is OutfitsUiState.Error)
-        assertTrue((estado as OutfitsUiState.Error).mensaje.startsWith("Sin conexión"))
+        assertEquals(
+            textos.obtener(R.string.error_sin_conexion),
+            (estado as OutfitsUiState.Error).mensaje
+        )
     }
 }

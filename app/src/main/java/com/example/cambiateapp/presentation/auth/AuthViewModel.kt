@@ -2,12 +2,14 @@ package com.example.cambiateapp.presentation.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cambiateapp.R
 import com.example.cambiateapp.domain.error.CampoInvalido
 import com.example.cambiateapp.domain.error.DomainException
 import com.example.cambiateapp.domain.usecase.EnviarRecuperacionContrasenaUseCase
 import com.example.cambiateapp.domain.usecase.LoginConGoogleUseCase
 import com.example.cambiateapp.domain.usecase.LoginUseCase
 import com.example.cambiateapp.domain.usecase.RegisterUseCase
+import com.example.cambiateapp.presentation.common.ProveedorDeTextos
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +23,8 @@ class AuthViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val registerUseCase: RegisterUseCase,
     private val enviarRecuperacionContrasena: EnviarRecuperacionContrasenaUseCase,
-    private val loginConGoogleUseCase: LoginConGoogleUseCase
+    private val loginConGoogleUseCase: LoginConGoogleUseCase,
+    private val textos: ProveedorDeTextos
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthUiState())
@@ -59,20 +62,17 @@ class AuthViewModel @Inject constructor(
 
             AuthUiEvent.RecuperarCancelar ->
                 _uiState.update {
-                    // Mientras se está enviando no dejamos cerrar, para no perder el resultado.
                     if (it.recuperacion.enviando) it else it.copy(recuperacion = RecuperacionUiState())
                 }
 
             AuthUiEvent.MensajeMostrado ->
                 _uiState.update { it.copy(mensaje = null) }
 
-            // Mientras Google muestra su selector, la pantalla queda "cargando" para bloquear doble toque.
             AuthUiEvent.GoogleIniciado ->
                 _uiState.update { if (it.estaCargando) it else it.copy(estado = AuthEstado.Cargando) }
 
             is AuthUiEvent.GoogleTokenObtenido -> loginConGoogle(event.idToken)
 
-            // Cerró el selector: volvemos a Inactivo sin mostrar ningún error.
             AuthUiEvent.GoogleCancelado ->
                 _uiState.update {
                     if (it.estado is AuthEstado.Cargando) it.copy(estado = AuthEstado.Inactivo) else it
@@ -98,7 +98,9 @@ class AuthViewModel @Inject constructor(
         val actual = _uiState.value
         if (actual.estaCargando) return
         if (actual.password != actual.confirmPassword) {
-            _uiState.update { it.copy(confirmPasswordError = "Las contraseñas no coinciden") }
+            _uiState.update {
+                it.copy(confirmPasswordError = textos.obtener(R.string.auth_error_pass_no_coinciden))
+            }
             return
         }
         _uiState.update { it.copy(estado = AuthEstado.Cargando) }
@@ -119,11 +121,13 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    private fun mensajeGoogle(error: Throwable): String = when (error) {
-        DomainException.SinConexion -> "Sin conexión. Revisá tu internet e intentá de nuevo"
-        DomainException.EmailYaRegistrado -> "Ese email ya está registrado con otro método de acceso"
-        else -> "No pudimos iniciar sesión con Google. Intentá de nuevo"
-    }
+    private fun mensajeGoogle(error: Throwable): String = textos.obtener(
+        when (error) {
+            DomainException.SinConexion -> R.string.error_sin_conexion
+            DomainException.EmailYaRegistrado -> R.string.google_error_email_otro_metodo
+            else -> R.string.google_error_generico
+        }
+    )
 
     private fun abrirRecuperacion() {
         _uiState.update {
@@ -143,7 +147,7 @@ class AuthViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             recuperacion = RecuperacionUiState(),
-                            mensaje = "Si el mail está registrado, te enviamos un link para elegir una contraseña nueva"
+                            mensaje = textos.obtener(R.string.recuperar_ok)
                         )
                     }
                 }
@@ -160,40 +164,41 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    private fun mensajeRecuperacion(error: Throwable): String = when (error) {
-        DomainException.EmailInvalido -> "Ingresá un email válido"
-        DomainException.SinConexion -> "Sin conexión. Revisá tu internet e intentá de nuevo"
-        else -> "No pudimos enviar el mail. Intentá de nuevo"
-    }
+    private fun mensajeRecuperacion(error: Throwable): String = textos.obtener(
+        when (error) {
+            DomainException.EmailInvalido -> R.string.auth_error_email_invalido
+            DomainException.SinConexion -> R.string.error_sin_conexion
+            else -> R.string.recuperar_error_envio
+        }
+    )
 
-    // Traduce los errores del dominio a mensajes para mostrar en pantalla.
     private fun aplicarError(state: AuthUiState, error: Throwable): AuthUiState {
         val inactivo = state.copy(estado = AuthEstado.Inactivo)
         return when (error) {
             DomainException.EmailInvalido ->
-                inactivo.copy(emailError = "Ingresá un email válido")
+                inactivo.copy(emailError = textos.obtener(R.string.auth_error_email_invalido))
 
             DomainException.ContrasenaDebil ->
-                inactivo.copy(passwordError = "La contraseña debe tener al menos 6 caracteres")
+                inactivo.copy(passwordError = textos.obtener(R.string.auth_error_pass_debil))
 
             DomainException.EmailYaRegistrado ->
-                inactivo.copy(emailError = "Ese email ya está registrado")
+                inactivo.copy(emailError = textos.obtener(R.string.auth_error_email_registrado))
 
             is DomainException.Validacion ->
                 if (error.campo == CampoInvalido.CONTRASENA) {
-                    inactivo.copy(passwordError = "Ingresá tu contraseña")
+                    inactivo.copy(passwordError = textos.obtener(R.string.auth_error_pass_vacia))
                 } else {
-                    state.copy(estado = AuthEstado.Error("Revisá los datos ingresados"))
+                    state.copy(estado = AuthEstado.Error(textos.obtener(R.string.error_revisar_datos)))
                 }
 
             DomainException.CredencialesInvalidas ->
-                state.copy(estado = AuthEstado.Error("Email o contraseña incorrectos"))
+                state.copy(estado = AuthEstado.Error(textos.obtener(R.string.auth_error_credenciales)))
 
             DomainException.SinConexion ->
-                state.copy(estado = AuthEstado.Error("Sin conexión. Revisá tu internet e intentá de nuevo"))
+                state.copy(estado = AuthEstado.Error(textos.obtener(R.string.error_sin_conexion)))
 
             else ->
-                state.copy(estado = AuthEstado.Error("Ocurrió un error inesperado. Intentá de nuevo"))
+                state.copy(estado = AuthEstado.Error(textos.obtener(R.string.error_inesperado)))
         }
     }
 }
