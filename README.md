@@ -7,7 +7,7 @@ CambiateApp es un armario digital para Android. El usuario carga sus prendas con
 
 ## Cómo probar la app (APK)
 
-**Descarga del APK:** `**Descarga del APK:** `[<link-al-apk>](https://github.com/TomiNavasd/cambiateApp/releases/tag/v1.0)``
+**Descarga del APK:** https://github.com/TomiNavasd/cambiateApp/releases/tag/v1.0
 
 ### Instalación
 
