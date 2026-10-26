@@ -2,9 +2,11 @@ package com.example.cambiateapp.presentation.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cambiateapp.R
 import com.example.cambiateapp.domain.model.ModoTema
 import com.example.cambiateapp.domain.usecase.GuardarModoTemaUseCase
 import com.example.cambiateapp.domain.usecase.ObservarModoTemaUseCase
+import com.example.cambiateapp.presentation.common.ProveedorDeTextos
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
@@ -19,6 +21,7 @@ import kotlinx.coroutines.launch
 class AjustesViewModel @Inject constructor(
     observarModoTema: ObservarModoTemaUseCase,
     private val guardarModoTema: GuardarModoTemaUseCase,
+    private val textos: ProveedorDeTextos,
 ) : ViewModel() {
 
     private val aviso = MutableStateFlow<String?>(null)
@@ -42,7 +45,7 @@ class AjustesViewModel @Inject constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                aviso.value = "No pudimos guardar el tema"
+                aviso.value = textos.obtener(R.string.ajustes_error_tema)
             }
         }
     }

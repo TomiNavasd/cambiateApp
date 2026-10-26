@@ -2,6 +2,7 @@ package com.example.cambiateapp.presentation.settings
 
 import com.example.cambiateapp.MainDispatcherRule
 import com.example.cambiateapp.TemaRepositoryFake
+import com.example.cambiateapp.TextosFake
 import com.example.cambiateapp.domain.model.ModoTema
 import com.example.cambiateapp.domain.usecase.GuardarModoTemaUseCase
 import com.example.cambiateapp.domain.usecase.ObservarModoTemaUseCase
@@ -28,9 +29,9 @@ class AjustesViewModelTest {
     private fun crearViewModel() = AjustesViewModel(
         observarModoTema = ObservarModoTemaUseCase(repositorio),
         guardarModoTema = GuardarModoTemaUseCase(repositorio),
+        textos = TextosFake(),
     )
 
-    /** El estado solo se calcula si alguien lo está mirando: este "observador" hace de pantalla. */
     private fun TestScope.observar(viewModel: AjustesViewModel) {
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiState.collect { }

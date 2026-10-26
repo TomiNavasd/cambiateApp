@@ -2,10 +2,12 @@ package com.example.cambiateapp.presentation.wardrobe
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cambiateapp.R
 import com.example.cambiateapp.domain.error.DomainException
 import com.example.cambiateapp.domain.model.Categoria
 import com.example.cambiateapp.domain.model.Prenda
 import com.example.cambiateapp.domain.usecase.ObservePrendasUseCase
+import com.example.cambiateapp.presentation.common.ProveedorDeTextos
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.text.Normalizer
 import javax.inject.Inject
@@ -23,7 +25,8 @@ import kotlinx.coroutines.flow.update
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class WardrobeViewModel @Inject constructor(
-    private val observePrendas: ObservePrendasUseCase
+    private val observePrendas: ObservePrendasUseCase,
+    private val textos: ProveedorDeTextos
 ) : ViewModel() {
 
     private val filtro = MutableStateFlow<Categoria?>(null)
@@ -66,19 +69,21 @@ class WardrobeViewModel @Inject constructor(
     }
 
     private fun coincide(prenda: Prenda, buscado: String): Boolean {
-        val campos = listOf(prenda.nombre, prenda.categoria.etiqueta()) +
+        // La categoría se compara con su nombre en el idioma actual de la app.
+        val campos = listOf(prenda.nombre, textos.obtener(prenda.categoria.etiquetaRes())) +
                 prenda.colores + prenda.etiquetas
         return campos.any { normalizar(it).contains(buscado) }
     }
 
-    /** Minúsculas y sin tildes, para que "Otoño" y "otono" coincidan. */
     private fun normalizar(texto: String): String =
         Normalizer.normalize(texto.trim().lowercase(), Normalizer.Form.NFD)
             .replace(Regex("\\p{Mn}+"), "")
 
-    private fun mensajeDe(error: Throwable): String = when (error) {
-        DomainException.SinConexion -> "Sin conexión. Revisá tu internet e intentá de nuevo"
-        DomainException.SinPermisos -> "No tenés permiso para ver estas prendas"
-        else -> "No pudimos cargar tu armario"
-    }
+    private fun mensajeDe(error: Throwable): String = textos.obtener(
+        when (error) {
+            DomainException.SinConexion -> R.string.error_sin_conexion
+            DomainException.SinPermisos -> R.string.armario_error_sin_permiso
+            else -> R.string.armario_error_cargar
+        }
+    )
 }

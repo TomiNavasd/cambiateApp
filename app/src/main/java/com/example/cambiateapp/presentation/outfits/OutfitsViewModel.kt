@@ -2,6 +2,7 @@ package com.example.cambiateapp.presentation.outfits
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cambiateapp.R
 import com.example.cambiateapp.domain.error.DomainException
 import com.example.cambiateapp.domain.model.Ocasion
 import com.example.cambiateapp.domain.model.Outfit
@@ -11,6 +12,7 @@ import com.example.cambiateapp.domain.usecase.ObserveOutfitsUseCase
 import com.example.cambiateapp.domain.usecase.ObservePrendasUseCase
 import com.example.cambiateapp.domain.usecase.SaveOutfitUseCase
 import com.example.cambiateapp.domain.usecase.SuggestOutfitsUseCase
+import com.example.cambiateapp.presentation.common.ProveedorDeTextos
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -30,7 +32,8 @@ class OutfitsViewModel @Inject constructor(
     observePrendas: ObservePrendasUseCase,
     private val saveOutfit: SaveOutfitUseCase,
     private val deleteOutfit: DeleteOutfitUseCase,
-    private val suggestOutfits: SuggestOutfitsUseCase
+    private val suggestOutfits: SuggestOutfitsUseCase,
+    private val textos: ProveedorDeTextos
 ) : ViewModel() {
 
     private data class Local(
@@ -90,7 +93,7 @@ class OutfitsViewModel @Inject constructor(
                         it.copy(
                             sugiriendo = false,
                             sugerencias = lista,
-                            aviso = if (lista.isEmpty()) AVISO_SIN_SUGERENCIAS else null
+                            aviso = if (lista.isEmpty()) textos.obtener(R.string.outfits_aviso_sin_sugerencias) else null
                         )
                     }
                 },
@@ -102,7 +105,6 @@ class OutfitsViewModel @Inject constructor(
     private fun guardarSugerencia(indice: Int) {
         val outfit = local.value.sugerencias.getOrNull(indice) ?: return
 
-        // Un outfit con la misma ocasión y las mismas prendas ya guardado no se repite.
         val guardados = (uiState.value as? OutfitsUiState.Contenido)?.guardados.orEmpty()
         val yaExiste = guardados.any {
             it.outfit.ocasion == outfit.ocasion &&
@@ -112,7 +114,7 @@ class OutfitsViewModel @Inject constructor(
             local.update { actual ->
                 actual.copy(
                     sugerencias = actual.sugerencias.filterNot { it === outfit },
-                    aviso = "Ese outfit ya está guardado"
+                    aviso = textos.obtener(R.string.outfits_aviso_ya_guardado)
                 )
             }
             return
@@ -124,7 +126,7 @@ class OutfitsViewModel @Inject constructor(
                     local.update { actual ->
                         actual.copy(
                             sugerencias = actual.sugerencias.filterNot { it === outfit },
-                            aviso = "Outfit guardado"
+                            aviso = textos.obtener(R.string.outfits_aviso_guardado)
                         )
                     }
                 },
@@ -147,16 +149,12 @@ class OutfitsViewModel @Inject constructor(
         }
     }
 
-    private fun mensajeDe(error: Throwable): String = when (error) {
-        DomainException.SinConexion -> "Sin conexión. Revisá tu internet e intentá de nuevo."
-        DomainException.SesionNoIniciada -> "Tu sesión terminó. Volvé a iniciar sesión."
-        DomainException.SinPermisos -> "No tenés permisos para esta acción."
-        else -> "Ocurrió un error inesperado. Intentá de nuevo."
-    }
-
-    private companion object {
-        const val AVISO_SIN_SUGERENCIAS =
-            "No hay prendas suficientes para esa ocasión: necesitás al menos una superior, " +
-                    "una inferior y un calzado marcados para ella."
-    }
+    private fun mensajeDe(error: Throwable): String = textos.obtener(
+        when (error) {
+            DomainException.SinConexion -> R.string.error_sin_conexion
+            DomainException.SesionNoIniciada -> R.string.error_sesion_vencida
+            DomainException.SinPermisos -> R.string.outfits_error_permisos
+            else -> R.string.error_inesperado
+        }
+    )
 }
