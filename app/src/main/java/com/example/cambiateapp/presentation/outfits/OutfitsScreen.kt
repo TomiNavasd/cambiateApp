@@ -62,6 +62,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -69,14 +70,15 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.example.cambiateapp.R
 import com.example.cambiateapp.domain.model.Categoria
 import com.example.cambiateapp.domain.model.Ocasion
 import com.example.cambiateapp.domain.model.Outfit
 import com.example.cambiateapp.domain.model.Prenda
 import com.example.cambiateapp.presentation.components.ErrorState
 import com.example.cambiateapp.presentation.components.LoadingState
-import com.example.cambiateapp.presentation.wardrobe.detalleCorto
-import com.example.cambiateapp.presentation.wardrobe.etiqueta
+import com.example.cambiateapp.presentation.wardrobe.detalleCortoLocalizado
+import com.example.cambiateapp.presentation.wardrobe.etiquetaRes
 import com.example.cambiateapp.ui.theme.CambiateAppTheme
 import java.time.Instant
 
@@ -118,13 +120,21 @@ fun OutfitsScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("¿Para qué ocasión?", style = MaterialTheme.typography.headlineSmall) },
+                title = {
+                    Text(
+                        text = stringResource(R.string.outfits_titulo),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 ),
                 navigationIcon = {
                     IconButton(onClick = onVolver) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Volver")
+                        Icon(
+                            Icons.AutoMirrored.Rounded.ArrowBack,
+                            contentDescription = stringResource(R.string.accion_volver)
+                        )
                     }
                 }
             )
@@ -149,18 +159,23 @@ fun OutfitsScreen(
     outfitAEliminar?.let { id ->
         AlertDialog(
             onDismissRequest = { outfitAEliminar = null },
-            title = { Text("¿Eliminar outfit?") },
-            text = { Text("Se borra el outfit, pero tus prendas se mantienen en el armario.") },
+            title = { Text(stringResource(R.string.outfits_eliminar_titulo)) },
+            text = { Text(stringResource(R.string.outfits_eliminar_texto)) },
             confirmButton = {
                 TextButton(onClick = {
                     outfitAEliminar = null
                     onEvent(OutfitsUiEvent.Eliminar(id))
                 }) {
-                    Text("Eliminar", color = MaterialTheme.colorScheme.error)
+                    Text(
+                        text = stringResource(R.string.accion_eliminar),
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
             },
             dismissButton = {
-                TextButton(onClick = { outfitAEliminar = null }) { Text("Cancelar") }
+                TextButton(onClick = { outfitAEliminar = null }) {
+                    Text(stringResource(R.string.accion_cancelar))
+                }
             }
         )
     }
@@ -211,13 +226,16 @@ private fun ContenidoOutfits(
 
             if (state.sugerencias.isNotEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
-                    Text("Sugerencias", style = MaterialTheme.typography.titleLarge)
+                    Text(
+                        text = stringResource(R.string.outfits_sugerencias),
+                        style = MaterialTheme.typography.titleLarge
+                    )
                 }
                 itemsIndexed(state.sugerencias) { indice, item ->
                     OutfitTarjeta(
                         item = item,
                         favorito = false,
-                        descripcionCorazon = "Guardar outfit",
+                        descripcionCorazon = stringResource(R.string.outfits_guardar),
                         onCorazon = { onEvent(OutfitsUiEvent.GuardarSugerencia(indice)) },
                         onVerDetalles = { seleccion = Seleccion(true, indice.toString()) }
                     )
@@ -225,12 +243,15 @@ private fun ContenidoOutfits(
             }
 
             item(span = { GridItemSpan(maxLineSpan) }) {
-                Text("Guardados", style = MaterialTheme.typography.titleLarge)
+                Text(
+                    text = stringResource(R.string.outfits_guardados),
+                    style = MaterialTheme.typography.titleLarge
+                )
             }
             if (state.guardados.isEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     Text(
-                        text = "Todavía no guardaste outfits. Pedí una sugerencia y guardá la que más te guste.",
+                        text = stringResource(R.string.outfits_sin_guardados),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -240,8 +261,10 @@ private fun ContenidoOutfits(
                     OutfitTarjeta(
                         item = item,
                         favorito = item.outfit.favorito,
-                        descripcionCorazon = if (item.outfit.favorito) "Quitar de favoritos"
-                        else "Marcar como favorito",
+                        descripcionCorazon = stringResource(
+                            if (item.outfit.favorito) R.string.outfits_quitar_favorito
+                            else R.string.outfits_marcar_favorito
+                        ),
                         onCorazon = { onEvent(OutfitsUiEvent.AlternarFavorito(item.outfit)) },
                         onVerDetalles = { seleccion = Seleccion(false, item.outfit.id) }
                     )
@@ -250,7 +273,9 @@ private fun ContenidoOutfits(
         }
 
         BotonGenerar(
-            texto = if (state.sugerencias.isEmpty()) "Sugerirme outfits" else "Generar más outfits",
+            texto = stringResource(
+                if (state.sugerencias.isEmpty()) R.string.outfits_sugerir else R.string.outfits_generar_mas
+            ),
             cargando = state.sugiriendo,
             onClick = { onEvent(OutfitsUiEvent.Sugerir) },
             modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
@@ -309,7 +334,10 @@ private fun OcasionChip(
                 contentDescription = null,
                 modifier = Modifier.size(20.dp)
             )
-            Text(text = ocasion.etiqueta(), style = MaterialTheme.typography.labelLarge)
+            Text(
+                text = stringResource(ocasion.etiquetaRes()),
+                style = MaterialTheme.typography.labelLarge
+            )
         }
     }
 }
@@ -334,12 +362,12 @@ private fun BannerSugeridos() {
             )
             Column {
                 Text(
-                    text = "Outfits sugeridos con tu ropa",
+                    text = stringResource(R.string.outfits_banner_titulo),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "Combinaciones creadas con las prendas de tu armario.",
+                    text = stringResource(R.string.outfits_banner_texto),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -387,7 +415,8 @@ private fun OutfitTarjeta(
     onCorazon: () -> Unit,
     onVerDetalles: () -> Unit
 ) {
-    val temporada = item.temporadaTexto()
+    val clavesTemporada = item.temporadasComunes()
+    val temporada = textoDeTemporadas(clavesTemporada)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -448,7 +477,7 @@ private fun OutfitTarjeta(
 
             Column(modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 8.dp)) {
                 Text(
-                    text = item.nombreVisible(),
+                    text = item.nombreVisibleLocalizado(),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     maxLines = 2,
@@ -461,10 +490,10 @@ private fun OutfitTarjeta(
                 ) {
                     DatoConIcono(
                         icono = Icons.Rounded.CalendarToday,
-                        texto = item.outfit.ocasion.etiqueta()
+                        texto = stringResource(item.outfit.ocasion.etiquetaRes())
                     )
                     if (temporada != null) {
-                        DatoConIcono(icono = iconoDeTemporada(temporada), texto = temporada)
+                        DatoConIcono(icono = iconoPorTemporada(clavesTemporada), texto = temporada)
                     }
                 }
             }
@@ -477,7 +506,7 @@ private fun OutfitTarjeta(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp).height(36.dp)
             ) {
                 Text(
-                    text = "Ver detalles",
+                    text = stringResource(R.string.outfits_ver_detalles),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -520,21 +549,22 @@ private fun DetalleOutfitSheet(
     onDescartar: () -> Unit,
     onEliminar: () -> Unit
 ) {
-    val temporada = item.temporadaTexto()
+    val clavesTemporada = item.temporadasComunes()
+    val temporada = textoDeTemporadas(clavesTemporada)
 
     ModalBottomSheet(onDismissRequest = onCerrar) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(text = item.nombreVisible(), style = MaterialTheme.typography.titleLarge)
+            Text(text = item.nombreVisibleLocalizado(), style = MaterialTheme.typography.titleLarge)
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 DatoConIcono(
                     icono = Icons.Rounded.CalendarToday,
-                    texto = item.outfit.ocasion.etiqueta()
+                    texto = stringResource(item.outfit.ocasion.etiquetaRes())
                 )
                 if (temporada != null) {
-                    DatoConIcono(icono = iconoDeTemporada(temporada), texto = temporada)
+                    DatoConIcono(icono = iconoPorTemporada(clavesTemporada), texto = temporada)
                 }
             }
 
@@ -567,8 +597,10 @@ private fun DetalleOutfitSheet(
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
-                            text = listOfNotNull(prenda.categoria.etiqueta(), prenda.detalleCorto())
-                                .joinToString(" · "),
+                            text = listOfNotNull(
+                                stringResource(prenda.categoria.etiquetaRes()),
+                                prenda.detalleCortoLocalizado()
+                            ).joinToString(" · "),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -581,19 +613,29 @@ private fun DetalleOutfitSheet(
                     onClick = onGuardar,
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth().height(48.dp)
-                ) { Text("Guardar outfit", style = MaterialTheme.typography.labelLarge) }
+                ) {
+                    Text(
+                        text = stringResource(R.string.outfits_guardar),
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
                 OutlinedButton(
                     onClick = onDescartar,
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.fillMaxWidth().height(48.dp)
-                ) { Text("Descartar", style = MaterialTheme.typography.labelLarge) }
+                ) {
+                    Text(
+                        text = stringResource(R.string.outfits_descartar),
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
             } else {
                 TextButton(
                     onClick = onEliminar,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Eliminar outfit",
+                        text = stringResource(R.string.outfits_eliminar),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.labelLarge
                     )

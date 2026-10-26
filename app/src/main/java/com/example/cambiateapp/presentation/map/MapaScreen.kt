@@ -45,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -55,6 +56,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.cambiateapp.R
 import com.example.cambiateapp.domain.model.ConsejoClima
 import com.example.cambiateapp.domain.model.Coordenadas
 import com.example.cambiateapp.domain.model.Pronostico
@@ -63,25 +65,22 @@ import com.example.cambiateapp.presentation.components.ErrorState
 import com.example.cambiateapp.presentation.components.LoadingState
 import com.example.cambiateapp.ui.theme.CambiateAppTheme
 import java.io.File
+import java.text.DateFormat
+import java.util.Date
 import kotlin.math.roundToInt
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
-import java.text.DateFormat
-import java.util.Date
+import com.example.cambiateapp.ui.text.mensajeLocalizado
+import com.example.cambiateapp.ui.text.tituloLocalizado
 
-/**
- * De dónde salen las imágenes del mapa. Si los servidores de OpenStreetMap bloquean los pedidos
- * (se ven carteles "Access blocked"), cambiar MAPNIK por TileSourceFactory.OpenTopo.
- */
+
 private val FuenteDeMapa = TileSourceFactory.OpenTopo
 
-/** Desde este porcentaje de lluvia se muestra el paraguas en vez del termómetro. */
 private const val LLUVIA_PARA_PARAGUAS_PCT = 50
 
-/** Capa con estado: conecta el ViewModel y se ocupa del permiso de ubicación. */
 @Composable
 fun MapaRoute(
     onVolver: () -> Unit,
@@ -94,13 +93,11 @@ fun MapaRoute(
     val pedirPermisos = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { resultado ->
-        // Alcanza con que acepte la ubicación aproximada o la precisa.
         viewModel.onEvent(
             if (resultado.values.any { it }) MapaUiEvent.PermisoConcedido else MapaUiEvent.PermisoRechazado
         )
     }
 
-    // Si ya había dado el permiso antes, no hace falta pedirlo de nuevo.
     LaunchedEffect(Unit) {
         if (tienePermisoDeUbicacion(context)) viewModel.onEvent(MapaUiEvent.PermisoConcedido)
     }
@@ -121,7 +118,6 @@ fun MapaRoute(
     )
 }
 
-/** Pantalla "tonta": dibuja el estado y avisa con callbacks. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapaScreen(
@@ -137,7 +133,12 @@ fun MapaScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Mapa", style = MaterialTheme.typography.headlineSmall) },
+                title = {
+                    Text(
+                        text = stringResource(R.string.mapa_titulo),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 ),
@@ -145,7 +146,7 @@ fun MapaScreen(
                     IconButton(onClick = onVolver) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = "Volver"
+                            contentDescription = stringResource(R.string.accion_volver)
                         )
                     }
                 }
@@ -155,13 +156,12 @@ fun MapaScreen(
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             when (state) {
                 is MapaUiState.SinPermiso -> EmptyState(
-                    titulo = "Necesitamos tu ubicación",
-                    mensaje = if (state.rechazado) {
-                        "Sin el permiso no podemos mostrarte en el mapa. Podés activarlo desde los ajustes del sistema."
-                    } else {
-                        "Para mostrarte en el mapa necesitamos permiso de ubicación."
-                    },
-                    textoBoton = "Dar permiso",
+                    titulo = stringResource(R.string.mapa_ubicacion_titulo),
+                    mensaje = stringResource(
+                        if (state.rechazado) R.string.mapa_permiso_rechazado
+                        else R.string.mapa_permiso_pedido
+                    ),
+                    textoBoton = stringResource(R.string.mapa_dar_permiso),
                     onClick = onPedirPermiso
                 )
                 MapaUiState.Cargando -> LoadingState()
@@ -170,7 +170,11 @@ fun MapaScreen(
                     onReintentar = onReintentar
                 )
                 is MapaUiState.Contenido -> {
-                    VistaDeMapa(ubicacion = state.ubicacion, modifier = Modifier.fillMaxSize())
+                    VistaDeMapa(
+                        ubicacion = state.ubicacion,
+                        tituloMarcador = stringResource(R.string.mapa_estas_aca),
+                        modifier = Modifier.fillMaxSize()
+                    )
                     // La licencia del mapa exige mostrar esta atribución (sale de la fuente elegida).
                     Text(
                         text = FuenteDeMapa.copyrightNotice,
@@ -195,7 +199,6 @@ fun MapaScreen(
     }
 }
 
-/** Tarjeta sobre el mapa: dónde estás, el clima de mañana y el botón para sugerir outfits. */
 @Composable
 private fun TarjetaClima(
     clima: ClimaUi?,
@@ -221,7 +224,7 @@ private fun TarjetaClima(
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = "Tu ubicación",
+                    text = stringResource(R.string.mapa_tu_ubicacion),
                     style = MaterialTheme.typography.labelLarge
                 )
             }
@@ -232,13 +235,13 @@ private fun TarjetaClima(
                     CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                     Spacer(Modifier.width(12.dp))
                     Text(
-                        text = "Buscando el clima…",
+                        text = stringResource(R.string.mapa_buscando_clima),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 else -> Text(
-                    text = "No pudimos obtener el clima por ahora.",
+                    text = stringResource(R.string.mapa_sin_clima),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -255,7 +258,10 @@ private fun TarjetaClima(
             ) {
                 Icon(imageVector = Icons.Rounded.AutoAwesome, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Sugerir", style = MaterialTheme.typography.labelLarge)
+                Text(
+                    text = stringResource(R.string.mapa_sugerir),
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
         }
     }
@@ -277,12 +283,13 @@ private fun ContenidoClima(clima: ClimaUi) {
         )
         Column {
             Text(
-                text = "Mañana · ${pronostico.tempMinC.roundToInt()}° / ${pronostico.tempMaxC.roundToInt()}°",
-                style = MaterialTheme.typography.titleLarge
+                text = clima.consejo.tituloLocalizado(),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium
             )
             Text(
-                text = "${pronostico.probLluviaPct}% de probabilidad de lluvia",
-                style = MaterialTheme.typography.bodySmall,
+                text = clima.consejo.mensajeLocalizado(),
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -299,21 +306,26 @@ private fun ContenidoClima(clima: ClimaUi) {
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
+    // Sin internet se muestra el último pronóstico guardado: se aclara de cuándo es.
     if (pronostico.deCache) {
         val cuando = pronostico.obtenidoEnMs?.let {
             DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(it))
         }
         Text(
-            text = if (cuando != null) "Sin conexión · Última actualización: $cuando"
-            else "Sin conexión · Datos guardados",
+            text = if (cuando != null) stringResource(R.string.mapa_cache_actualizacion, cuando)
+            else stringResource(R.string.mapa_cache_guardado),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
-/** Mapa de osmdroid (una vista clásica de Android) dentro de Compose. */
+
 @Composable
-private fun VistaDeMapa(ubicacion: Coordenadas, modifier: Modifier = Modifier) {
+private fun VistaDeMapa(
+    ubicacion: Coordenadas,
+    tituloMarcador: String,
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -351,7 +363,7 @@ private fun VistaDeMapa(ubicacion: Coordenadas, modifier: Modifier = Modifier) {
             vista.overlays.add(
                 Marker(vista).apply {
                     position = punto
-                    title = "Estás acá"
+                    title = tituloMarcador
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 }
             )
@@ -367,7 +379,6 @@ private fun tienePermisoDeUbicacion(context: Context): Boolean =
             ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
             PackageManager.PERMISSION_GRANTED
 
-/** osmdroid guarda las imágenes del mapa en la caché de la app (no pide permiso de almacenamiento). */
 private fun configurarOsmdroid(context: Context) {
     val configuracion = Configuration.getInstance()
     configuracion.load(context, context.getSharedPreferences("osmdroid", Context.MODE_PRIVATE))

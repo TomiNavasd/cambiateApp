@@ -1,0 +1,208 @@
+<resources>
+    <string name="sin_conexion_banner">Sem conexão. Suas alterações serão sincronizadas quando a internet voltar.</string>
+
+    <!-- Comunes -->
+    <string name="accion_volver">Voltar</string>
+
+    <!-- Barra inferior -->
+    <string name="nav_armario">Armário</string>
+    <string name="nav_outfits">Looks</string>
+    <string name="nav_mapa">Mapa</string>
+
+    <!-- Ajustes -->
+    <string name="ajustes_titulo">Configurações</string>
+    <string name="ajustes_apariencia">Aparência</string>
+    <string name="tema_automatico">Automático (conforme o celular)</string>
+    <string name="tema_claro">Claro</string>
+    <string name="tema_oscuro">Escuro</string>
+    <string name="ajustes_idioma">Idioma</string>
+    <string name="idioma_automatico">Automático (conforme o celular)</string>
+    <string name="ajustes_idioma_no_disponible">Mudar o idioma exige Android 13 ou superior. O app usa o idioma do celular.</string>
+    <string name="ajustes_notificaciones">Notificações</string>
+    <string name="ajustes_recordatorios">Lembretes do clima</string>
+
+    <!-- Login -->
+    <string name="auth_slogan">Seu estilo, sempre por perto</string>
+    <string name="auth_email">E-mail</string>
+    <string name="auth_password">Senha</string>
+    <string name="auth_olvidaste_password">Esqueceu sua senha?</string>
+    <string name="auth_iniciar_sesion">Entrar</string>
+    <string name="auth_o">ou</string>
+    <string name="auth_continuar_google">Continuar com o Google</string>
+    <string name="auth_sin_cuenta">Não tem uma conta?</string>
+    <string name="auth_registrate">Cadastre-se</string>
+
+    <!-- Recuperar contraseña -->
+    <string name="recuperar_titulo">Recuperar senha</string>
+    <string name="recuperar_descripcion">Digite seu e-mail e enviaremos um link para você escolher uma nova senha.</string>
+    <string name="recuperar_enviar">Enviar</string>
+    <string name="recuperar_enviando">Enviando...</string>
+    <string name="recuperar_cancelar">Cancelar</string>
+
+    <!-- Acciones comunes -->
+    <string name="accion_reintentar">Tentar novamente</string>
+    <string name="accion_cancelar">Cancelar</string>
+    <string name="accion_eliminar">Excluir</string>
+
+    <!-- Categorías -->
+    <string name="categoria_superior">Blusas</string>
+    <string name="categoria_inferior">Calças</string>
+    <string name="categoria_calzado">Calçados</string>
+    <string name="categoria_abrigo">Jaquetas</string>
+    <string name="categoria_accesorio">Acessórios</string>
+
+    <!-- Ocasiones -->
+    <string name="ocasion_trabajo">Trabalho</string>
+    <string name="ocasion_facultad">Faculdade</string>
+    <string name="ocasion_salida">Balada</string>
+    <string name="ocasion_casamiento">Casamento</string>
+    <string name="ocasion_deporte">Esporte</string>
+    <string name="ocasion_casual">Casual</string>
+
+    <!-- Temporadas -->
+    <string name="temporada_verano">Verão</string>
+    <string name="temporada_otono">Outono</string>
+    <string name="temporada_invierno">Inverno</string>
+    <string name="temporada_primavera">Primavera</string>
+    <string name="temporada_entretiempo">Meia-estação</string>
+    <string name="temporada_todo_el_anio">O ano todo</string>
+
+    <!-- Tarjeta de prenda -->
+    <string name="prenda_opciones">Opções de %1$s</string>
+    <string name="prenda_ver_detalle">Ver detalhes</string>
+    <string name="prenda_editar">Editar</string>
+
+    <!-- Detalle de prenda -->
+    <string name="detalle_titulo">Detalhes</string>
+    <string name="detalle_no_encontrada_titulo">Não encontramos esta peça</string>
+    <string name="detalle_no_encontrada_mensaje">Ela pode ter sido excluída.</string>
+    <string name="detalle_categoria">Categoria</string>
+    <string name="detalle_colores">Cores</string>
+    <string name="detalle_ocasiones">Ocasiões</string>
+    <string name="detalle_editar">Editar peça</string>
+    <string name="detalle_eliminar">Excluir peça</string>
+    <string name="detalle_eliminando">Excluindo...</string>
+    <string name="detalle_dialogo_titulo">Excluir esta peça?</string>
+    <string name="detalle_dialogo_texto">Você vai apagar \"%1$s\" do seu armário. Esta ação não pode ser desfeita.</string>
+
+    <!-- Alta y edición de prenda -->
+    <string name="alta_titulo_nueva">Nova peça</string>
+    <string name="alta_titulo_editar">Editar peça</string>
+    <string name="alta_nombre">Nome</string>
+    <string name="alta_descripcion">Descrição (opcional)</string>
+    <string name="alta_categoria">Categoria</string>
+    <string name="alta_ocasiones">Ocasiões</string>
+    <string name="alta_colores">Cores</string>
+    <string name="alta_colores_ayuda">Separadas por vírgula. Ex.: branco, azul</string>
+    <string name="alta_guardar">Salvar peça</string>
+    <string name="foto_titulo">Foto</string>
+    <string name="foto_vacia">Você ainda não escolheu uma foto</string>
+    <string name="foto_descripcion">Foto da peça</string>
+    <string name="foto_galeria">Galeria</string>
+    <string name="foto_camara">Câmera</string>
+    <string name="foto_analizando">Analisando peça…</string>
+
+    <!-- Registro -->
+    <string name="registro_titulo">Criar conta</string>
+    <string name="registro_password_ayuda">Mínimo de 6 caracteres</string>
+    <string name="registro_confirmar">Confirmar senha</string>
+    <string name="registro_crear">Criar conta</string>
+    <string name="registro_con_cuenta">Já tem uma conta?</string>
+    <string name="registro_inicia_sesion">Entrar</string>
+
+    <!-- Comunes -->
+    <string name="accion_aceptar">OK</string>
+
+    <!-- Armario -->
+    <string name="armario_titulo">Meu armário</string>
+    <string name="armario_buscar_accion">Buscar</string>
+    <string name="armario_mas_opciones">Mais opções</string>
+    <string name="menu_cerrar_sesion">Sair</string>
+    <string name="cerrar_sesion_confirmar">Tem certeza de que quer sair?</string>
+    <string name="armario_agregar_prenda">Adicionar peça</string>
+    <string name="armario_vacio_titulo">Seu armário está vazio</string>
+    <string name="armario_vacio_mensaje">Comece adicionando suas roupas para organizá-las e criar looks.</string>
+    <string name="armario_vacio_boton">Adicionar minha primeira peça</string>
+    <string name="armario_buscar_placeholder">Buscar peças</string>
+    <string name="armario_borrar_busqueda">Limpar busca</string>
+    <string name="armario_filtro_todas">Todas</string>
+    <string name="armario_sin_resultados">Não encontramos peças com esse filtro</string>
+
+    <!-- Recordatorios -->
+    <string name="notif_titulo">Lembretes</string>
+    <string name="notif_aviso_clima">Aviso do clima</string>
+    <string name="notif_descripcion">Avisamos todos os dias o que vestir de acordo com o clima de amanhã.</string>
+    <string name="notif_recibir_diario">Receber o aviso diário</string>
+    <string name="notif_hora">Horário do aviso</string>
+    <string name="notif_probar">Testar agora</string>
+
+    <!-- Mapa -->
+    <string name="mapa_titulo">Mapa</string>
+    <string name="mapa_ubicacion_titulo">Precisamos da sua localização</string>
+    <string name="mapa_permiso_rechazado">Sem a permissão não podemos mostrar você no mapa. Você pode ativá-la nas configurações do sistema.</string>
+    <string name="mapa_permiso_pedido">Para mostrar você no mapa precisamos da permissão de localização.</string>
+    <string name="mapa_dar_permiso">Conceder permissão</string>
+    <string name="mapa_tu_ubicacion">Sua localização</string>
+    <string name="mapa_buscando_clima">Buscando o clima…</string>
+    <string name="mapa_sin_clima">Não conseguimos obter o clima agora.</string>
+    <string name="mapa_sugerir">Sugerir</string>
+    <string name="mapa_manana">Amanhã · %1$d° / %2$d°</string>
+    <string name="mapa_lluvia">%1$d%% de chance de chuva</string>
+    <string name="mapa_cache_actualizacion">Sem conexão · Última atualização: %1$s</string>
+    <string name="mapa_cache_guardado">Sem conexão · Dados salvos</string>
+    <string name="mapa_estas_aca">Você está aqui</string>
+
+    <!-- Outfits -->
+    <string name="outfits_titulo">Para qual ocasião?</string>
+    <string name="outfits_eliminar_titulo">Excluir look?</string>
+    <string name="outfits_eliminar_texto">O look é apagado, mas suas peças continuam no armário.</string>
+    <string name="outfits_sugerencias">Sugestões</string>
+    <string name="outfits_guardados">Salvos</string>
+    <string name="outfits_sin_guardados">Você ainda não salvou nenhum look. Peça uma sugestão e salve a que mais gostar.</string>
+    <string name="outfits_guardar">Salvar look</string>
+    <string name="outfits_quitar_favorito">Remover dos favoritos</string>
+    <string name="outfits_marcar_favorito">Marcar como favorito</string>
+    <string name="outfits_sugerir">Sugerir looks</string>
+    <string name="outfits_generar_mas">Gerar mais looks</string>
+    <string name="outfits_banner_titulo">Looks sugeridos com suas roupas</string>
+    <string name="outfits_banner_texto">Combinações criadas com as peças do seu armário.</string>
+    <string name="outfits_ver_detalles">Ver detalhes</string>
+    <string name="outfits_descartar">Descartar</string>
+    <string name="outfits_eliminar">Excluir look</string>
+    <string name="outfit_nombre_combinado">%1$s com %2$s</string>
+    <string name="outfit_generico">Look</string>
+
+    <!-- Consejo del clima -->
+    <string name="consejo_lluvia_titulo">Amanhã vai chover</string>
+    <string name="consejo_lluvia_con_abrigo">%1$d%% de chance de chuva: use %2$s.</string>
+    <string name="consejo_lluvia_sin_abrigo">%1$d%% de chance de chuva: leve guarda-chuva ou uma jaqueta impermeável.</string>
+    <string name="consejo_frio_titulo">Amanhã vai fazer frio</string>
+    <string name="consejo_frio_con_abrigo">A mínima será de %1$d°: agasalhe-se com %2$s.</string>
+    <string name="consejo_frio_sin_abrigo">A mínima será de %1$d°: agasalhe-se bem.</string>
+    <string name="consejo_calor_titulo">Amanhã vai fazer calor</string>
+    <string name="consejo_calor_mensaje">A máxima será de %1$d°: escolha roupas leves.</string>
+    <string name="consejo_agradable_titulo">Amanhã, clima agradável</string>
+    <string name="consejo_agradable_mensaje">Você não precisa de agasalho especial. Escolha o look de que mais gostar!</string>
+
+    <!-- Canal de notificaciones -->
+    <string name="notif_canal_nombre">Dicas do clima</string>
+    <string name="notif_canal_descripcion">O que vestir de acordo com o clima de amanhã</string>
+
+    <!-- Avisos de recordatorios -->
+    <string name="notif_hoy">hoje</string>
+    <string name="notif_manana">amanhã</string>
+    <string name="notif_aviso_probar_ok">Pronto, veja a barra de notificações</string>
+    <string name="notif_aviso_sin_permiso_notif">Não há permissão para mostrar notificações</string>
+    <string name="notif_aviso_permiso_rechazado">Sem permissão não podemos avisar você. Ative-a nas configurações do sistema.</string>
+    <string name="notif_aviso_ubicacion_rechazada">Sem a sua localização não sabemos o clima da sua região. Ative-a nas configurações do sistema.</string>
+    <string name="notif_aviso_desactivado">Lembrete desativado</string>
+    <string name="notif_aviso_error_guardar">Não conseguimos salvar o lembrete</string>
+    <string name="notif_aviso_activado">Lembrete ativado: avisamos %1$s às %2$02d:%3$02d e depois todos os dias. Agora são %4$02d:%5$02d neste dispositivo.</string>
+
+    <!-- Errores de ubicación -->
+    <string name="error_ubicacion">Não conseguimos obter sua localização.</string>
+    <string name="error_ubicacion_gps">Não conseguimos obter sua localização. Verifique se o GPS está ativado.</string>
+
+    <string name="consejo_prueba_titulo">Amanhã vai chover (teste)</string>
+    <string name="consejo_prueba_mensaje">Assim ficará o seu aviso do clima. Toque para ver seus looks.</string>
+</resources>
