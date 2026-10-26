@@ -69,6 +69,8 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import java.text.DateFormat
+import java.util.Date
 
 /**
  * De dónde salen las imágenes del mapa. Si los servidores de OpenStreetMap bloquean los pedidos
@@ -297,8 +299,18 @@ private fun ContenidoClima(clima: ClimaUi) {
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
+    if (pronostico.deCache) {
+        val cuando = pronostico.obtenidoEnMs?.let {
+            DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(it))
+        }
+        Text(
+            text = if (cuando != null) "Sin conexión · Última actualización: $cuando"
+            else "Sin conexión · Datos guardados",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
 }
-
 /** Mapa de osmdroid (una vista clásica de Android) dentro de Compose. */
 @Composable
 private fun VistaDeMapa(ubicacion: Coordenadas, modifier: Modifier = Modifier) {

@@ -8,17 +8,25 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.cambiateapp.domain.model.ModoTema
+import com.example.cambiateapp.presentation.components.BannerSinConexion
+import com.example.cambiateapp.presentation.connectivity.ConectividadViewModel
 import com.example.cambiateapp.presentation.navigation.AppRoot
 import com.example.cambiateapp.presentation.navigation.SessionViewModel
 import com.example.cambiateapp.presentation.theme.TemaViewModel
 import com.example.cambiateapp.ui.theme.CambiateAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
-/** Fondos semitransparentes de la barra de navegación, según el tema. */
 private val FondoBarraClaro = Color.argb(0xE6, 0xFF, 0xFF, 0xFF)
 private val FondoBarraOscuro = Color.argb(0x80, 0x1B, 0x1B, 0x1B)
 
@@ -27,6 +35,7 @@ class MainActivity : ComponentActivity() {
 
     private val sessionViewModel: SessionViewModel by viewModels()
     private val temaViewModel: TemaViewModel by viewModels()
+    private val conectividadViewModel: ConectividadViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,8 +48,7 @@ class MainActivity : ComponentActivity() {
                 ModoTema.OSCURO -> true
             }
 
-            // Los íconos de la barra de estado y de navegación tienen que verse bien
-            // con el tema elegido, aunque no coincida con el del sistema.
+
             DisposableEffect(oscuro) {
                 enableEdgeToEdge(
                     statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { oscuro },
@@ -51,10 +59,27 @@ class MainActivity : ComponentActivity() {
 
             CambiateAppTheme(darkTheme = oscuro) {
                 val estado by sessionViewModel.uiState.collectAsStateWithLifecycle()
-                AppRoot(
-                    estado = estado,
-                    onEvent = sessionViewModel::onEvent
-                )
+                val hayConexion by conectividadViewModel.hayConexion.collectAsStateWithLifecycle()
+
+                Column(modifier = Modifier.fillMaxSize()) {
+                    if (!hayConexion) BannerSinConexion()
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxSize()
+                            .then(
+
+                                if (!hayConexion) Modifier.consumeWindowInsets(WindowInsets.statusBars)
+                                else Modifier
+                            )
+                    ) {
+                        AppRoot(
+                            estado = estado,
+                            onEvent = sessionViewModel::onEvent
+                        )
+                    }
+                }
             }
         }
     }

@@ -4,7 +4,7 @@ import com.example.cambiateapp.data.mapper.toDomain
 import com.example.cambiateapp.data.mapper.toDomainException
 import com.example.cambiateapp.data.mapper.toDto
 import com.example.cambiateapp.data.remote.OutfitDto
-import com.example.cambiateapp.data.remote.llamarRemoto
+import com.example.cambiateapp.data.remote.confirmarOEncolar
 import com.example.cambiateapp.domain.error.DomainException
 import com.example.cambiateapp.domain.model.Outfit
 import com.example.cambiateapp.domain.repository.OutfitRepository
@@ -16,7 +16,6 @@ import javax.inject.Singleton
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.tasks.await
 
 @Singleton
 class OutfitRepositoryImpl @Inject constructor(
@@ -52,15 +51,13 @@ class OutfitRepositoryImpl @Inject constructor(
     override suspend fun guardarOutfit(outfit: Outfit): Result<Unit> {
         val uid = auth.currentUser?.uid ?: return Result.failure(DomainException.SesionNoIniciada)
         return try {
-            llamarRemoto {
-                val dto = outfit.toDto(uid)
-                if (outfit.esNuevo) {
-                    outfits.add(dto).await()
-                } else {
-                    outfits.document(outfit.id)
-                        .set(dto, SetOptions.mergeFields(CAMPOS_EDITABLES))
-                        .await()
-                }
+            val dto = outfit.toDto(uid)
+            if (outfit.esNuevo) {
+                outfits.add(dto).confirmarOEncolar()
+            } else {
+                outfits.document(outfit.id)
+                    .set(dto, SetOptions.mergeFields(CAMPOS_EDITABLES))
+                    .confirmarOEncolar()
             }
             Result.success(Unit)
         } catch (e: DomainException) {
@@ -71,7 +68,7 @@ class OutfitRepositoryImpl @Inject constructor(
     override suspend fun eliminarOutfit(id: String): Result<Unit> {
         if (auth.currentUser == null) return Result.failure(DomainException.SesionNoIniciada)
         return try {
-            llamarRemoto { outfits.document(id).delete().await() }
+            outfits.document(id).delete().confirmarOEncolar()
             Result.success(Unit)
         } catch (e: DomainException) {
             Result.failure(e)
