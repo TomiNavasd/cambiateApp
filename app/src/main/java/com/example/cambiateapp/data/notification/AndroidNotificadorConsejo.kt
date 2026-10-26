@@ -18,8 +18,8 @@ import com.example.cambiateapp.MainActivity
 import com.example.cambiateapp.R
 import com.example.cambiateapp.domain.model.ConsejoClima
 import com.example.cambiateapp.domain.notification.NotificadorConsejo
-import com.example.cambiateapp.ui.text.mensajeLocalizado
-import com.example.cambiateapp.ui.text.tituloLocalizado
+import com.example.cambiateapp.common.mensajeLocalizado
+import com.example.cambiateapp.common.tituloLocalizado
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton

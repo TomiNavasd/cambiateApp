@@ -67,14 +67,13 @@ import com.example.cambiateapp.ui.theme.CambiateAppTheme
 import java.io.File
 import java.text.DateFormat
 import java.util.Date
-import kotlin.math.roundToInt
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
-import com.example.cambiateapp.ui.text.mensajeLocalizado
-import com.example.cambiateapp.ui.text.tituloLocalizado
+import com.example.cambiateapp.common.mensajeLocalizado
+import com.example.cambiateapp.common.tituloLocalizado
 
 
 private val FuenteDeMapa = TileSourceFactory.OpenTopo

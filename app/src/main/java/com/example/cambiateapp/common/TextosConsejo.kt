@@ -1,4 +1,4 @@
-package com.example.cambiateapp.ui.text
+package com.example.cambiateapp.common
 
 import android.content.Context
 import androidx.compose.runtime.Composable
