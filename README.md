@@ -7,7 +7,7 @@ CambiateApp es un armario digital para Android. El usuario carga sus prendas con
 
 ## Cómo probar la app (APK)
 
-**Descarga del APK:** `<link-al-apk>`
+**Descarga del APK:** `**Descarga del APK:** `[<link-al-apk>](https://github.com/TomiNavasd/cambiateApp/releases/tag/v1.0)``
 
 ### Instalación
 
@@ -22,7 +22,7 @@ CambiateApp es un armario digital para Android. El usuario carga sus prendas con
 3. Para el login con Google, agregá antes una cuenta de Google al emulador (Ajustes → Contraseñas y cuentas).
 4. La ubicación del emulador por defecto no es real: cambiala en los tres puntos (`…`) → **Location**.
 
-**Requisitos:** Android `<minSdk>` o superior, y conexión a internet (ver "Modo sin conexión" para lo que funciona sin ella). El selector de idioma requiere Android 13 o superior.
+**Requisitos:** Android `26` o superior, y conexión a internet (ver "Modo sin conexión" para lo que funciona sin ella). El selector de idioma requiere Android 13 o superior.
 
 ### Cuenta de prueba
 
