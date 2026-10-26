@@ -205,4 +205,52 @@
 
     <string name="consejo_prueba_titulo">Amanhã vai chover (teste)</string>
     <string name="consejo_prueba_mensaje">Assim ficará o seu aviso do clima. Toque para ver seus looks.</string>
+
+    <!-- Errores comunes -->
+    <string name="error_sin_conexion">Sem conexão. Verifique sua internet e tente novamente</string>
+    <string name="error_inesperado">Ocorreu um erro inesperado. Tente novamente</string>
+    <string name="error_revisar_datos">Revise os dados informados</string>
+    <string name="error_sesion_vencida">Sua sessão expirou. Faça login novamente</string>
+
+    <!-- Errores de login y registro -->
+    <string name="auth_error_pass_no_coinciden">As senhas não coincidem</string>
+    <string name="auth_error_email_invalido">Digite um e-mail válido</string>
+    <string name="auth_error_pass_debil">A senha deve ter pelo menos 6 caracteres</string>
+    <string name="auth_error_email_registrado">Esse e-mail já está cadastrado</string>
+    <string name="auth_error_pass_vacia">Digite sua senha</string>
+    <string name="auth_error_credenciales">E-mail ou senha incorretos</string>
+    <string name="recuperar_ok">Se o e-mail estiver cadastrado, enviamos um link para você escolher uma nova senha</string>
+    <string name="recuperar_error_envio">Não conseguimos enviar o e-mail. Tente novamente</string>
+    <string name="google_error_generico">Não conseguimos entrar com o Google. Tente novamente</string>
+    <string name="google_error_email_otro_metodo">Esse e-mail já está cadastrado com outro método de acesso</string>
+    <string name="google_error_sin_cuenta">Não encontramos uma conta Google neste celular</string>
+
+    <!-- Alta y edición de prenda -->
+    <string name="alta_error_nombre">Digite um nome</string>
+    <string name="alta_error_foto">Escolha uma foto para a peça</string>
+    <string name="alta_error_subir_foto">Não conseguimos enviar a foto. Tente novamente</string>
+    <string name="alta_error_foto_sin_internet">A nova foto precisa de internet para ser enviada. Conecte-se e toque em Salvar novamente: os dados que você digitou não se perdem.</string>
+    <string name="alta_error_guardar">Não conseguimos salvar a peça</string>
+    <string name="alta_error_cargar">Não conseguimos carregar a peça</string>
+    <string name="alta_error_sin_permiso">Você não tem permissão para modificar esta peça</string>
+    <string name="escaneo_ok">Preenchemos os dados com IA. Revise-os e corrija o que for preciso.</string>
+    <string name="escaneo_fallo">Não conseguimos analisar a foto. Preencha os dados manualmente.</string>
+    <string name="escaneo_sin_internet">Sem conexão: a nova foto precisa de internet para ser analisada e enviada. Você pode preencher os dados manualmente e salvar quando a conexão voltar.</string>
+
+    <!-- Armario y detalle -->
+    <string name="armario_error_sin_permiso">Você não tem permissão para ver estas peças</string>
+    <string name="armario_error_cargar">Não conseguimos carregar seu armário</string>
+    <string name="detalle_error_sin_permiso">Você não tem permissão para ver esta peça</string>
+    <string name="detalle_error_eliminar_sin_conexion">Sem conexão. Não conseguimos excluir a peça</string>
+    <string name="detalle_error_eliminar_sin_permiso">Você não tem permissão para excluir esta peça</string>
+    <string name="detalle_error_eliminar">Não conseguimos excluir a peça</string>
+
+    <!-- Ajustes -->
+    <string name="ajustes_error_tema">Não conseguimos salvar o tema</string>
+
+    <!-- Avisos de outfits -->
+    <string name="outfits_aviso_sin_sugerencias">Não há peças suficientes para essa ocasião: você precisa de pelo menos uma peça de cima, uma de baixo e um calçado marcados para ela.</string>
+    <string name="outfits_aviso_ya_guardado">Esse look já está salvo</string>
+    <string name="outfits_aviso_guardado">Look salvo</string>
+    <string name="outfits_error_permisos">Você não tem permissão para esta ação.</string>
 </resources>

@@ -205,4 +205,52 @@
 
     <string name="consejo_prueba_titulo">It will rain tomorrow (test)</string>
     <string name="consejo_prueba_mensaje">This is how your weather alert will look. Tap to see your outfits.</string>
+
+    <!-- Errores comunes -->
+    <string name="error_sin_conexion">No connection. Check your internet and try again</string>
+    <string name="error_inesperado">An unexpected error occurred. Try again</string>
+    <string name="error_revisar_datos">Check the data you entered</string>
+    <string name="error_sesion_vencida">Your session expired. Sign in again</string>
+
+    <!-- Errores de login y registro -->
+    <string name="auth_error_pass_no_coinciden">Passwords don\'t match</string>
+    <string name="auth_error_email_invalido">Enter a valid email</string>
+    <string name="auth_error_pass_debil">The password must be at least 6 characters long</string>
+    <string name="auth_error_email_registrado">That email is already registered</string>
+    <string name="auth_error_pass_vacia">Enter your password</string>
+    <string name="auth_error_credenciales">Incorrect email or password</string>
+    <string name="recuperar_ok">If the email is registered, we sent you a link to choose a new password</string>
+    <string name="recuperar_error_envio">We couldn\'t send the email. Try again</string>
+    <string name="google_error_generico">We couldn\'t sign you in with Google. Try again</string>
+    <string name="google_error_email_otro_metodo">That email is already registered with another sign-in method</string>
+    <string name="google_error_sin_cuenta">We couldn\'t find a Google account on this phone</string>
+
+    <!-- Alta y edición de prenda -->
+    <string name="alta_error_nombre">Enter a name</string>
+    <string name="alta_error_foto">Choose a photo for the item</string>
+    <string name="alta_error_subir_foto">We couldn\'t upload the photo. Try again</string>
+    <string name="alta_error_foto_sin_internet">The new photo needs internet to upload. Connect and tap Save again: the data you typed isn\'t lost.</string>
+    <string name="alta_error_guardar">We couldn\'t save the item</string>
+    <string name="alta_error_cargar">We couldn\'t load the item</string>
+    <string name="alta_error_sin_permiso">You don\'t have permission to modify this item</string>
+    <string name="escaneo_ok">We filled in the details with AI. Review them and fix whatever is needed.</string>
+    <string name="escaneo_fallo">We couldn\'t analyze the photo. Fill in the details by hand.</string>
+    <string name="escaneo_sin_internet">No connection: the new photo needs internet to be analyzed and uploaded. You can fill in the details by hand and save when the connection is back.</string>
+
+    <!-- Armario y detalle -->
+    <string name="armario_error_sin_permiso">You don\'t have permission to view these items</string>
+    <string name="armario_error_cargar">We couldn\'t load your wardrobe</string>
+    <string name="detalle_error_sin_permiso">You don\'t have permission to view this item</string>
+    <string name="detalle_error_eliminar_sin_conexion">No connection. We couldn\'t delete the item</string>
+    <string name="detalle_error_eliminar_sin_permiso">You don\'t have permission to delete this item</string>
+    <string name="detalle_error_eliminar">We couldn\'t delete the item</string>
+
+    <!-- Ajustes -->
+    <string name="ajustes_error_tema">We couldn\'t save the theme</string>
+
+    <!-- Avisos de outfits -->
+    <string name="outfits_aviso_sin_sugerencias">There aren\'t enough items for that occasion: you need at least one top, one bottom and one pair of shoes marked for it.</string>
+    <string name="outfits_aviso_ya_guardado">That outfit is already saved</string>
+    <string name="outfits_aviso_guardado">Outfit saved</string>
+    <string name="outfits_error_permisos">You don\'t have permission for this action.</string>
 </resources>

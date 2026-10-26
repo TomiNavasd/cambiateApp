@@ -10,17 +10,16 @@ import kotlinx.coroutines.withTimeoutOrNull
 class AnalizarPrendaUseCase @Inject constructor(
     private val analizador: AnalizadorDePrenda
 ) {
-    suspend operator fun invoke(fotoUrl: String): AnalisisPrenda? {
+    suspend operator fun invoke(fotoUrl: String, idioma: String = "es"): AnalisisPrenda? {
         if (fotoUrl.isBlank()) return null
 
         val cruda = withTimeoutOrNull(TIEMPO_MAXIMO_MS) {
-            analizador.analizar(fotoUrl).getOrNull()
+            analizador.analizar(fotoUrl, idioma).getOrNull()
         } ?: return null
 
         return limpiar(cruda)
     }
 
-    /** No confiamos en lo que devuelve la IA: recortamos textos y descartamos lo que no sirva. */
     private fun limpiar(cruda: AnalisisPrenda) = AnalisisPrenda(
         nombre = cruda.nombre.trim().take(MAX_NOMBRE),
         descripcion = cruda.descripcion.trim().take(MAX_DESCRIPCION),

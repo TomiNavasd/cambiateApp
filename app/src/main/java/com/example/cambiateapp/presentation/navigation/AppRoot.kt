@@ -1,4 +1,5 @@
 package com.example.cambiateapp.presentation.navigation
+import androidx.annotation.StringRes
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,9 +25,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.cambiateapp.R
 
 @Composable
 fun AppRoot(
@@ -47,14 +50,14 @@ fun AppRoot(
 
 private data class DestinoInferior(
     val ruta: String,
-    val titulo: String,
+    @StringRes val titulo: Int,
     val icono: ImageVector
 )
 
 private val destinosInferiores = listOf(
-    DestinoInferior(Ruta.Lista.route, "Armario", Icons.Rounded.Checkroom),
-    DestinoInferior(Ruta.Outfits.route, "Outfits", Icons.Rounded.AutoAwesome),
-    DestinoInferior(Ruta.Mapa.route, "Mapa", Icons.Rounded.Map)
+    DestinoInferior(Ruta.Lista.route, R.string.nav_armario, Icons.Rounded.Checkroom),
+    DestinoInferior(Ruta.Outfits.route, R.string.nav_outfits, Icons.Rounded.AutoAwesome),
+    DestinoInferior(Ruta.Mapa.route, R.string.nav_mapa, Icons.Rounded.Map)
 )
 
 @Composable
@@ -65,12 +68,10 @@ private fun AppNavigation(
 ) {
     val navController = rememberNavController()
 
-    // La pantalla inicial se decide una sola vez, según la sesión al arrancar.
     val destinoInicial = remember {
         if (estado == SessionUiState.ConSesion) Ruta.Lista.route else Ruta.Login.route
     }
 
-    // Si la sesión se cierra mientras se usa la app: al Login y se vacía la pila.
     var estadoAnterior by remember { mutableStateOf(estado) }
     LaunchedEffect(estado) {
         if (estadoAnterior == SessionUiState.ConSesion && estado == SessionUiState.SinSesion) {
@@ -122,7 +123,9 @@ private fun BarraInferior(
                     }
                 },
                 icon = { Icon(imageVector = destino.icono, contentDescription = null) },
-                label = { Text(destino.titulo, style = MaterialTheme.typography.labelLarge) },
+                label = {
+                    Text(stringResource(destino.titulo), style = MaterialTheme.typography.labelLarge)
+                },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = MaterialTheme.colorScheme.primary,
                     selectedTextColor = MaterialTheme.colorScheme.primary,

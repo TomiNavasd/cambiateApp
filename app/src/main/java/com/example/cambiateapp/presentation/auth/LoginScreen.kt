@@ -44,7 +44,6 @@ import com.example.cambiateapp.presentation.components.PrimaryButton
 import com.example.cambiateapp.ui.theme.CambiateAppTheme
 import kotlinx.coroutines.launch
 
-/** Capa con estado: conecta el ViewModel con la pantalla y avisa cuando el login salió bien. */
 @Composable
 fun LoginRoute(
     onLoginExitoso: () -> Unit,
@@ -54,6 +53,7 @@ fun LoginRoute(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    // Lo genera el plugin de google-services a partir de google-services.json.
     val webClientId = stringResource(R.string.default_web_client_id)
 
     LaunchedEffect(state.estado) {
@@ -82,6 +82,7 @@ fun LoginRoute(
     )
 }
 
+/** Pantalla "tonta": solo dibuja el estado y manda eventos hacia arriba. */
 @Composable
 fun LoginScreen(
     state: AuthUiState,
@@ -124,12 +125,12 @@ fun LoginScreen(
             AppLogo()
             Spacer(Modifier.height(16.dp))
             Text(
-                text = "CambiateApp",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.displaySmall,
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "Tu estilo, siempre cerca",
+                text = stringResource(R.string.auth_slogan),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -138,7 +139,7 @@ fun LoginScreen(
             AppTextField(
                 value = state.email,
                 onValueChange = { onEvent(AuthUiEvent.EmailCambio(it)) },
-                label = "Email",
+                label = stringResource(R.string.auth_email),
                 leadingIcon = Icons.Rounded.Email,
                 error = state.emailError,
                 keyboardType = KeyboardType.Email
@@ -147,7 +148,7 @@ fun LoginScreen(
             PasswordTextField(
                 value = state.password,
                 onValueChange = { onEvent(AuthUiEvent.PasswordCambio(it)) },
-                label = "Contraseña",
+                label = stringResource(R.string.auth_password),
                 error = state.passwordError,
                 imeAction = ImeAction.Done,
                 keyboardActions = KeyboardActions(onDone = { onEvent(AuthUiEvent.LoginClick) })
@@ -159,7 +160,7 @@ fun LoginScreen(
             ) {
                 TextButton(onClick = { onEvent(AuthUiEvent.RecuperarClick) }) {
                     Text(
-                        text = "¿Olvidaste tu contraseña?",
+                        text = stringResource(R.string.auth_olvidaste_password),
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
@@ -167,14 +168,14 @@ fun LoginScreen(
             Spacer(Modifier.height(8.dp))
 
             PrimaryButton(
-                texto = "Iniciar sesión",
+                texto = stringResource(R.string.auth_iniciar_sesion),
                 onClick = { onEvent(AuthUiEvent.LoginClick) },
                 cargando = state.estaCargando
             )
             Spacer(Modifier.height(16.dp))
 
             Text(
-                text = "o",
+                text = stringResource(R.string.auth_o),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -187,18 +188,24 @@ fun LoginScreen(
                     .fillMaxWidth()
                     .height(52.dp)
             ) {
-                Text(text = "Continuar con Google", style = MaterialTheme.typography.labelLarge)
+                Text(
+                    text = stringResource(R.string.auth_continuar_google),
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
             Spacer(Modifier.height(8.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "¿No tenés una cuenta?",
+                    text = stringResource(R.string.auth_sin_cuenta),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 TextButton(onClick = onIrARegistro) {
-                    Text(text = "Registrate", style = MaterialTheme.typography.labelLarge)
+                    Text(
+                        text = stringResource(R.string.auth_registrate),
+                        style = MaterialTheme.typography.labelLarge
+                    )
                 }
             }
         }
@@ -212,6 +219,7 @@ fun LoginScreen(
     }
 }
 
+/** Diálogo para pedir el mail al que se manda el link de recuperación. */
 @Composable
 private fun RecuperarContrasenaDialog(
     state: RecuperacionUiState,
@@ -219,11 +227,11 @@ private fun RecuperarContrasenaDialog(
 ) {
     AlertDialog(
         onDismissRequest = { onEvent(AuthUiEvent.RecuperarCancelar) },
-        title = { Text("Recuperar contraseña") },
+        title = { Text(stringResource(R.string.recuperar_titulo)) },
         text = {
             Column {
                 Text(
-                    text = "Ingresá tu email y te mandamos un link para elegir una contraseña nueva.",
+                    text = stringResource(R.string.recuperar_descripcion),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -231,7 +239,7 @@ private fun RecuperarContrasenaDialog(
                 AppTextField(
                     value = state.email,
                     onValueChange = { onEvent(AuthUiEvent.RecuperarEmailCambio(it)) },
-                    label = "Email",
+                    label = stringResource(R.string.auth_email),
                     leadingIcon = Icons.Rounded.Email,
                     error = state.error,
                     keyboardType = KeyboardType.Email
@@ -243,7 +251,11 @@ private fun RecuperarContrasenaDialog(
                 onClick = { onEvent(AuthUiEvent.RecuperarEnviarClick) },
                 enabled = !state.enviando
             ) {
-                Text(if (state.enviando) "Enviando..." else "Enviar")
+                Text(
+                    stringResource(
+                        if (state.enviando) R.string.recuperar_enviando else R.string.recuperar_enviar
+                    )
+                )
             }
         },
         dismissButton = {
@@ -251,7 +263,7 @@ private fun RecuperarContrasenaDialog(
                 onClick = { onEvent(AuthUiEvent.RecuperarCancelar) },
                 enabled = !state.enviando
             ) {
-                Text("Cancelar")
+                Text(stringResource(R.string.recuperar_cancelar))
             }
         }
     )

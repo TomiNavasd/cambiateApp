@@ -49,12 +49,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.example.cambiateapp.R
 import com.example.cambiateapp.domain.model.Categoria
 import com.example.cambiateapp.domain.model.Ocasion
 import com.example.cambiateapp.presentation.components.AppTextField
@@ -65,7 +67,6 @@ import com.example.cambiateapp.presentation.components.LoadingState
 import com.example.cambiateapp.presentation.components.PrimaryButton
 import com.example.cambiateapp.ui.theme.CambiateAppTheme
 
-/** Capa con estado: conecta el ViewModel, arma los selectores de foto y avisa con callbacks. */
 @Composable
 fun AltaEdicionRoute(
     onGuardado: () -> Unit,
@@ -75,7 +76,6 @@ fun AltaEdicionRoute(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    // Uri donde la cámara va a dejar la foto. Se guarda para sobrevivir a una rotación.
     var uriCamara by rememberSaveable { mutableStateOf<Uri?>(null) }
 
     val galeria = rememberLauncherForActivityResult(
@@ -91,7 +91,6 @@ fun AltaEdicionRoute(
         if (tomada && uri != null) viewModel.onEvent(AltaEdicionUiEvent.FotoSeleccionada(uri.toString()))
     }
 
-    // Cuando se guardó bien, avisamos una sola vez para que la navegación vuelva atrás.
     LaunchedEffect(state.guardadoExitoso) {
         if (state.guardadoExitoso) onGuardado()
     }
@@ -129,7 +128,9 @@ fun AltaEdicionScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = if (state.esEdicion) "Editar prenda" else "Nueva prenda",
+                        text = stringResource(
+                            if (state.esEdicion) R.string.alta_titulo_editar else R.string.alta_titulo_nueva
+                        ),
                         style = MaterialTheme.typography.headlineSmall
                     )
                 },
@@ -137,7 +138,7 @@ fun AltaEdicionScreen(
                     IconButton(onClick = onVolver) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = "Volver"
+                            contentDescription = stringResource(R.string.accion_volver)
                         )
                     }
                 }
@@ -148,9 +149,9 @@ fun AltaEdicionScreen(
             when {
                 state.cargando -> LoadingState()
                 state.noEncontrada -> EmptyState(
-                    titulo = "No encontramos esta prenda",
-                    mensaje = "Puede que se haya eliminado.",
-                    textoBoton = "Volver",
+                    titulo = stringResource(R.string.detalle_no_encontrada_titulo),
+                    mensaje = stringResource(R.string.detalle_no_encontrada_mensaje),
+                    textoBoton = stringResource(R.string.accion_volver),
                     onClick = onVolver
                 )
                 state.errorCarga != null -> ErrorState(
@@ -199,7 +200,7 @@ private fun Formulario(
         AppTextField(
             value = state.nombre,
             onValueChange = { onEvent(AltaEdicionUiEvent.NombreCambio(it)) },
-            label = "Nombre",
+            label = stringResource(R.string.alta_nombre),
             leadingIcon = Icons.Rounded.Edit,
             error = state.errorNombre,
             enabled = habilitado
@@ -208,33 +209,39 @@ private fun Formulario(
         AppTextField(
             value = state.descripcion,
             onValueChange = { onEvent(AltaEdicionUiEvent.DescripcionCambio(it)) },
-            label = "Descripción (opcional)",
+            label = stringResource(R.string.alta_descripcion),
             leadingIcon = Icons.Rounded.Description,
             enabled = habilitado
         )
 
-        Text(text = "Categoría", style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = stringResource(R.string.alta_categoria),
+            style = MaterialTheme.typography.titleMedium
+        )
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Categoria.entries.forEach { categoria ->
                 CategoryChip(
-                    texto = categoria.etiqueta(),
+                    texto = stringResource(categoria.etiquetaRes()),
                     seleccionado = state.categoria == categoria,
                     onClick = { onEvent(AltaEdicionUiEvent.CategoriaSeleccionada(categoria)) }
                 )
             }
         }
 
-        Text(text = "Ocasiones", style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = stringResource(R.string.alta_ocasiones),
+            style = MaterialTheme.typography.titleMedium
+        )
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Ocasion.entries.forEach { ocasion ->
                 CategoryChip(
-                    texto = ocasion.etiqueta(),
+                    texto = stringResource(ocasion.etiquetaRes()),
                     seleccionado = ocasion in state.ocasiones,
                     onClick = { onEvent(AltaEdicionUiEvent.OcasionAlternada(ocasion)) }
                 )
@@ -244,9 +251,9 @@ private fun Formulario(
         AppTextField(
             value = state.colores,
             onValueChange = { onEvent(AltaEdicionUiEvent.ColoresCambio(it)) },
-            label = "Colores",
+            label = stringResource(R.string.alta_colores),
             leadingIcon = Icons.Rounded.Palette,
-            ayuda = "Separados por coma. Ej: blanco, azul",
+            ayuda = stringResource(R.string.alta_colores_ayuda),
             imeAction = ImeAction.Done,
             enabled = habilitado
         )
@@ -260,7 +267,7 @@ private fun Formulario(
         }
 
         PrimaryButton(
-            texto = "Guardar prenda",
+            texto = stringResource(R.string.alta_guardar),
             onClick = { onEvent(AltaEdicionUiEvent.Guardar) },
             cargando = state.guardando || state.analizando
         )
@@ -278,7 +285,10 @@ private fun SeccionFoto(
     onCamara: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(text = "Foto", style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = stringResource(R.string.foto_titulo),
+            style = MaterialTheme.typography.titleMedium
+        )
 
         Box(
             modifier = Modifier
@@ -298,7 +308,7 @@ private fun SeccionFoto(
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "Todavía no elegiste una foto",
+                        text = stringResource(R.string.foto_vacia),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -306,7 +316,7 @@ private fun SeccionFoto(
             } else {
                 AsyncImage(
                     model = foto,
-                    contentDescription = "Foto de la prenda",
+                    contentDescription = stringResource(R.string.foto_descripcion),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
@@ -321,7 +331,7 @@ private fun SeccionFoto(
             ) {
                 Icon(Icons.Rounded.PhotoLibrary, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("Galería")
+                Text(stringResource(R.string.foto_galeria))
             }
             OutlinedButton(
                 onClick = onCamara,
@@ -330,7 +340,7 @@ private fun SeccionFoto(
             ) {
                 Icon(Icons.Rounded.PhotoCamera, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("Cámara")
+                Text(stringResource(R.string.foto_camara))
             }
         }
 
@@ -339,7 +349,7 @@ private fun SeccionFoto(
                 CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = "Analizando prenda…",
+                    text = stringResource(R.string.foto_analizando),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

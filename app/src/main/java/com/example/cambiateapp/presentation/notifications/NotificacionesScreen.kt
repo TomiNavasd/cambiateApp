@@ -1,6 +1,7 @@
 package com.example.cambiateapp.presentation.notifications
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -38,13 +39,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.cambiateapp.R
 import com.example.cambiateapp.ui.theme.CambiateAppTheme
-import android.content.Context
 
 @Composable
 fun NotificacionesRoute(
@@ -54,7 +56,6 @@ fun NotificacionesRoute(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    // Permiso de ubicación: se pide al activar el aviso, para poder saber el clima de tu zona.
     val pedirUbicacion = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { resultado ->
@@ -81,7 +82,6 @@ fun NotificacionesRoute(
         }
     }
 
-    /** Aplica el evento y, si se está activando el aviso, se asegura de tener la ubicación. */
     fun aplicar(evento: NotificacionesUiEvent) {
         viewModel.onEvent(evento)
         if (evento is NotificacionesUiEvent.ActivarCambiado && evento.activo) asegurarUbicacion()
@@ -160,12 +160,17 @@ fun NotificacionesScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Recordatorios", style = MaterialTheme.typography.headlineSmall) },
+                title = {
+                    Text(
+                        text = stringResource(R.string.notif_titulo),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onVolver) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = "Volver"
+                            contentDescription = stringResource(R.string.accion_volver)
                         )
                     }
                 }
@@ -179,9 +184,12 @@ fun NotificacionesScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("Aviso del clima", style = MaterialTheme.typography.titleMedium)
             Text(
-                text = "Te avisamos todos los días qué ponerte según el clima de mañana.",
+                text = stringResource(R.string.notif_aviso_clima),
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = stringResource(R.string.notif_descripcion),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -191,7 +199,10 @@ fun NotificacionesScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Recibir el aviso diario", style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = stringResource(R.string.notif_recibir_diario),
+                    style = MaterialTheme.typography.bodyLarge
+                )
                 Switch(
                     checked = state.activo,
                     onCheckedChange = { onEvent(NotificacionesUiEvent.ActivarCambiado(it)) }
@@ -203,14 +214,17 @@ fun NotificacionesScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Hora del aviso", style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = stringResource(R.string.notif_hora),
+                    style = MaterialTheme.typography.bodyLarge
+                )
                 OutlinedButton(onClick = { selectorAbierto = true }) {
                     Text("%02d:%02d".format(state.hora, state.minuto))
                 }
             }
 
             Button(onClick = { onEvent(NotificacionesUiEvent.ProbarAhora) }) {
-                Text("Probar ahora")
+                Text(stringResource(R.string.notif_probar))
             }
         }
     }
@@ -223,16 +237,18 @@ fun NotificacionesScreen(
         )
         AlertDialog(
             onDismissRequest = { selectorAbierto = false },
-            title = { Text("Hora del aviso") },
+            title = { Text(stringResource(R.string.notif_hora)) },
             text = { TimePicker(state = horaState) },
             confirmButton = {
                 TextButton(onClick = {
                     onEvent(NotificacionesUiEvent.HoraElegida(horaState.hour, horaState.minute))
                     selectorAbierto = false
-                }) { Text("Aceptar") }
+                }) { Text(stringResource(R.string.accion_aceptar)) }
             },
             dismissButton = {
-                TextButton(onClick = { selectorAbierto = false }) { Text("Cancelar") }
+                TextButton(onClick = { selectorAbierto = false }) {
+                    Text(stringResource(R.string.accion_cancelar))
+                }
             }
         )
     }

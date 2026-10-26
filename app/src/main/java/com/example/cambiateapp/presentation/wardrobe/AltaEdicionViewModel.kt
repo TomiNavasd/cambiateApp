@@ -3,6 +3,7 @@ package com.example.cambiateapp.presentation.wardrobe
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cambiateapp.R
 import com.example.cambiateapp.domain.error.CampoInvalido
 import com.example.cambiateapp.domain.error.DomainException
 import com.example.cambiateapp.domain.model.AnalisisPrenda
@@ -13,6 +14,7 @@ import com.example.cambiateapp.domain.usecase.EtiquetarPrendaUseCase
 import com.example.cambiateapp.domain.usecase.GetPrendaUseCase
 import com.example.cambiateapp.domain.usecase.SavePrendaUseCase
 import com.example.cambiateapp.domain.usecase.UploadImageUseCase
+import com.example.cambiateapp.presentation.common.ProveedorDeTextos
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -29,7 +31,8 @@ class AltaEdicionViewModel @Inject constructor(
     private val savePrenda: SavePrendaUseCase,
     private val uploadImage: UploadImageUseCase,
     private val analizarPrenda: AnalizarPrendaUseCase,
-    private val etiquetarPrenda: EtiquetarPrendaUseCase
+    private val etiquetarPrenda: EtiquetarPrendaUseCase,
+    private val textos: ProveedorDeTextos
 ) : ViewModel() {
 
     private val prendaId: String? = savedStateHandle.get<String>(Ruta.AltaEdicion.ARG_ID)
@@ -82,7 +85,7 @@ class AltaEdicionViewModel @Inject constructor(
                     _uiState.update { it.copy(cargando = false, noEncontrada = true) }
                 } else {
                     etiquetas = prenda.etiquetas
-                    categoriaTocada = true // la prenda ya existe: su categoría es la que eligió el usuario
+                    categoriaTocada = true
                     _uiState.update {
                         it.copy(
                             cargando = false,
@@ -103,7 +106,6 @@ class AltaEdicionViewModel @Inject constructor(
         }
     }
 
-
     private fun escanear(uri: String) {
         etiquetas = emptyList()
         _uiState.update { it.copy(analizando = true, avisoEscaneo = null) }
@@ -112,26 +114,28 @@ class AltaEdicionViewModel @Inject constructor(
             val subida = uploadImage(uri)
             val url = subida.getOrNull()
             if (url == null) {
-                // Sin internet se avisa con claridad; cualquier otra falla usa el aviso general.
-                val aviso = if (subida.exceptionOrNull() === DomainException.SinConexion) {
-                    AVISO_ESCANEO_SIN_INTERNET
-                } else {
-                    AVISO_SIN_ESCANEO
-                }
+                val aviso = textos.obtener(
+                    if (subida.exceptionOrNull() === DomainException.SinConexion) R.string.escaneo_sin_internet
+                    else R.string.escaneo_fallo
+                )
                 _uiState.update { it.copy(analizando = false, avisoEscaneo = aviso) }
                 return@launch
             }
-            // Ya subida: guardamos la URL, así al guardar no se vuelve a subir.
             _uiState.update { it.copy(fotoUrl = url, fotoLocalUri = null) }
 
-            val analisis = analizarPrenda(url)
+            val analisis = analizarPrenda(url, textos.idioma())
             if (analisis == null) {
-                _uiState.update { it.copy(analizando = false, avisoEscaneo = AVISO_SIN_ESCANEO) }
+                _uiState.update {
+                    it.copy(analizando = false, avisoEscaneo = textos.obtener(R.string.escaneo_fallo))
+                }
                 return@launch
             }
             etiquetas = analisis.etiquetas
             _uiState.update {
-                precargar(it, analisis).copy(analizando = false, avisoEscaneo = AVISO_ESCANEO_OK)
+                precargar(it, analisis).copy(
+                    analizando = false,
+                    avisoEscaneo = textos.obtener(R.string.escaneo_ok)
+                )
             }
         }
     }
@@ -151,12 +155,10 @@ class AltaEdicionViewModel @Inject constructor(
 
     private fun guardar() {
         val actual = _uiState.value
-        // Si la IA todavía está analizando, esperamos: así no se guarda a medias ni se sube dos veces.
         if (actual.guardando || actual.analizando) return
 
-        // Evita subir la foto si el nombre está vacío: no tiene sentido gastar la subida.
         if (actual.nombre.isBlank()) {
-            _uiState.update { it.copy(errorNombre = "Ingresá un nombre") }
+            _uiState.update { it.copy(errorNombre = textos.obtener(R.string.alta_error_nombre)) }
             return
         }
 
@@ -215,35 +217,24 @@ class AltaEdicionViewModel @Inject constructor(
         val base = estado.copy(guardando = false)
         return when {
             error is DomainException.Validacion -> when (error.campo) {
-                CampoInvalido.NOMBRE -> base.copy(errorNombre = "Ingresá un nombre")
-                CampoInvalido.FOTO -> base.copy(errorFoto = "Elegí una foto para la prenda")
-                else -> base.copy(errorGeneral = "Revisá los datos ingresados")
+                CampoInvalido.NOMBRE -> base.copy(errorNombre = textos.obtener(R.string.alta_error_nombre))
+                CampoInvalido.FOTO -> base.copy(errorFoto = textos.obtener(R.string.alta_error_foto))
+                else -> base.copy(errorGeneral = textos.obtener(R.string.error_revisar_datos))
             }
             alSubirFoto && error === DomainException.SinConexion ->
-                base.copy(errorGeneral = ERROR_FOTO_SIN_INTERNET)
+                base.copy(errorGeneral = textos.obtener(R.string.alta_error_foto_sin_internet))
             alSubirFoto ->
-                base.copy(errorGeneral = "No pudimos subir la foto. Intentá de nuevo")
+                base.copy(errorGeneral = textos.obtener(R.string.alta_error_subir_foto))
             else -> base.copy(errorGeneral = mensajeDe(error, guardando = true))
         }
     }
 
-    private fun mensajeDe(error: Throwable, guardando: Boolean = false): String = when (error) {
-        DomainException.SinConexion -> "Sin conexión. Revisá tu internet e intentá de nuevo"
-        DomainException.SinPermisos -> "No tenés permiso para modificar esta prenda"
-        DomainException.SesionNoIniciada -> "Tu sesión venció. Iniciá sesión de nuevo"
-        else -> if (guardando) "No pudimos guardar la prenda" else "No pudimos cargar la prenda"
-    }
-
-    private companion object {
-        const val AVISO_ESCANEO_OK =
-            "Completamos los datos con IA. Revisalos y corregí lo que haga falta."
-        const val AVISO_SIN_ESCANEO =
-            "No pudimos analizar la foto. Completá los datos a mano."
-        const val AVISO_ESCANEO_SIN_INTERNET =
-            "Sin conexión: la foto nueva necesita internet para analizarse y subirse. " +
-                    "Podés completar los datos a mano y guardar cuando vuelva la conexión."
-        const val ERROR_FOTO_SIN_INTERNET =
-            "La foto nueva necesita internet para subirse. Conectate y volvé a tocar Guardar: " +
-                    "los datos que escribiste no se pierden."
-    }
+    private fun mensajeDe(error: Throwable, guardando: Boolean = false): String = textos.obtener(
+        when (error) {
+            DomainException.SinConexion -> R.string.error_sin_conexion
+            DomainException.SinPermisos -> R.string.alta_error_sin_permiso
+            DomainException.SesionNoIniciada -> R.string.error_sesion_vencida
+            else -> if (guardando) R.string.alta_error_guardar else R.string.alta_error_cargar
+        }
+    )
 }
