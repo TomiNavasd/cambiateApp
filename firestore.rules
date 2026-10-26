@@ -42,7 +42,7 @@ service cloud.firestore {
       allow delete: if esDueno(resource.data);
     }
 
-    // ---------- Colección outfits (se usa en la semana 2) ----------
+    // ---------- Colección outfits ----------
 
     match /outfits/{outfitId} {
       allow read: if esDueno(resource.data);
